@@ -3,12 +3,12 @@
         {
             "name": "R1",
             "interface_1": {
-                "router": "router2",
+                "router": "R2",
                 "protocol": "OSPF",
                 "name": "g1/0"
             },
             "interface_2": {
-                "router": "router4",
+                "router": "R4",
                 "protocol": "OSPF",
                 "name": "g2/0"
             },
@@ -17,12 +17,12 @@
         {
             "name": "R2",
             "interface_1": {
-                "router": "router1",
+                "router": "R1",
                 "protocol": "OSPF",
                 "name": "g1/0"
             },
             "interface_2": {
-                "router": "router3",
+                "router": "R3",
                 "protocol": "OSPF",
                 "name": "g2/0"
             },
@@ -31,12 +31,12 @@
         {
             "name": "R3",
             "interface_1": {
-                "router": "router2",
+                "router": "R2",
                 "protocol": "OSPF",
                 "name": "g2/0"
             },
             "interface_2": {
-                "router": "router4",
+                "router": "R4",
                 "protocol": "OSPF",
                 "name": "g1/0"
             },
@@ -45,12 +45,12 @@
         {
             "name": "R4",
             "interface_1": {
-                "router": "router1",
+                "router": "R1",
                 "protocol": "OSPF",
                 "name": "g2/0"
             },
             "interface_2": {
-                "router": "router3",
+                "router": "R3",
                 "protocol": "OSPF",
                 "name": "g2/0"
             },
