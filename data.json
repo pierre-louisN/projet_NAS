@@ -2,59 +2,67 @@
     "routers": [
         {
             "name": "R1",
-            "interface_1": {
-                "router": "R2",
-                "protocol": "OSPF",
-                "name": "g1/0"
-            },
-            "interface_2": {
-                "router": "R4",
-                "protocol": "OSPF",
-                "name": "g2/0"
-            },
-            "area": "1"
+            "area": "1",
+            "interfaces": [
+                {
+                    "router": "R2",
+                    "protocol": "OSPF",
+                    "name": "g1/0"
+                },
+                {
+                    "router": "R4",
+                    "protocol": "OSPF",
+                    "name": "g2/0"
+                }
+            ]
         },
         {
             "name": "R2",
-            "interface_1": {
-                "router": "R1",
-                "protocol": "OSPF",
-                "name": "g1/0"
-            },
-            "interface_2": {
-                "router": "R3",
-                "protocol": "OSPF",
-                "name": "g2/0"
-            },
-            "area": "1"
+            "area": "1",
+            "interfaces": [
+                {
+                    "router": "R1",
+                    "protocol": "OSPF",
+                    "name": "g1/0"
+                },
+                {
+                    "router": "R3",
+                    "protocol": "OSPF",
+                    "name": "g2/0"
+                }
+            ]
         },
         {
             "name": "R3",
-            "interface_1": {
-                "router": "R2",
-                "protocol": "OSPF",
-                "name": "g2/0"
-            },
-            "interface_2": {
-                "router": "R4",
-                "protocol": "OSPF",
-                "name": "g1/0"
-            },
-            "area": "1"
+            "area": "1",
+            "interfaces": [
+                {
+                    "router": "R2",
+                    "protocol": "OSPF",
+                    "name": "g2/0"
+                },
+                {
+                    "router": "R4",
+                    "protocol": "OSPF",
+                    "name": "g1/0"
+                }
+            ]
         },
         {
             "name": "R4",
-            "interface_1": {
-                "router": "R1",
-                "protocol": "OSPF",
-                "name": "g2/0"
-            },
-            "interface_2": {
-                "router": "R3",
-                "protocol": "OSPF",
-                "name": "g2/0"
-            },
-            "area": "1"
+            "area": "1",
+            "interfaces": [
+                {
+                    "router": "R1",
+                    "protocol": "OSPF",
+                    "name": "g2/0"
+                },
+                {
+                    "router": "R3",
+                    "protocol": "OSPF",
+                    "name": "g2/0"
+                }
+            ]
         }
     ]
 }
