@@ -1,6 +1,25 @@
 import json
 
 
+# HOST = "192.168.111.1"
+# user = raw_input("Enter your telnet username: ")
+# password = getpass.getpass()
+
+# tn = telnetlib.Telnet(HOST)
+
+# tn.read_until("Username: ")
+# tn.write(user + "\n")
+# tn.read_until("Password: ")
+# if password:
+#  tn.write(password + "\n")
+#  tn.write("enable\n")
+#  tn.write("cisco\n")
+#  tn.write("configure t\n")
+#  tn.write("int loop 0\n")
+#  tn.write("ip address 111.111.111.111 255.255.255.255\n")
+#  tn.write("end\n")
+#  tn.write("exit\n")
+
 
 def read_json():
 
@@ -11,11 +30,11 @@ def read_json():
             # print('Website: ' + p['website'])
             # print('From: ' + p['from'])
             # print('')
-            for i in p['interfaces']
-            if(i['protocol'] == "OSPF") :
-                #generate config
-                print('Name of router : \n' + p['name'])
-            
+            for i in p['interfaces']:
+                if(i['protocol'] == "OSPF") :
+                    #generate config
+                    print('Generation of OSPF config on router : '+ p['name'] + ' for interface '+ i['name']+'\n')
+
 
 
 if __name__ == "__main__":
