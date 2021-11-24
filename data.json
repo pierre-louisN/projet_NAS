@@ -1,0 +1,58 @@
+{
+    "routers": [
+        {
+            "router1": {
+                "interface_1": {
+                    "router": "router2",
+                    "protocol": "OSPF",
+                    "name": "g1/0"
+                },
+                "interface_2": {
+                    "router": "router4",
+                    "protocol": "OSPF",
+                    "name": "g2/0"
+                },
+                "area": "1"
+            },
+            "router2": {
+                "interface_1": {
+                    "router": "router1",
+                    "protocol": "OSPF",
+                    "name": "g1/0"
+                },
+                "interface_2": {
+                    "router": "router3",
+                    "protocol": "OSPF",
+                    "name": "g2/0"
+                },
+                "area": "1"
+            },
+            "router3": {
+                "interface_1": {
+                    "router": "router2",
+                    "protocol": "OSPF",
+                    "name": "g2/0"
+                },
+                "interface_2": {
+                    "router": "router4",
+                    "protocol": "OSPF",
+                    "name": "g1/0"
+                },
+                "area": "1"
+            },
+            "router4": {
+                "interface_1": {
+                    "router": "router1",
+                    "protocol": "OSPF",
+                    "name": "g2/0"
+                },
+                "interface_2": {
+                    "router": "router3",
+                    "protocol": "OSPF",
+                    "name": "g2/0"
+                },
+                "area": "1"
+            }
+        }
+    ]
+}
