@@ -6,20 +6,30 @@
             "area": "1",
             "interfaces": [
                 {
+                    "state": "up",
                     "router": "R2",
                     "protocols": [
                         "OSPF",
                         "MPLS"
                     ],
-                    "name": "g1/0"
+                    "name": "GigabitEthernet1/0"
                 },
                 {
+                    "state": "down",
+                    "name": "GigabitEthernet3/0"
+                },
+                {
+                    "state": "down",
+                    "name": "FastEthernet0/0"
+                },
+                {
+                    "state": "up",
                     "router": "R4",
                     "protocols": [
                         "OSPF",
                         "MPLS"
                     ],
-                    "name": "g2/0"
+                    "name": "GigabitEthernet2/0"
                 }
             ]
         },
@@ -29,20 +39,30 @@
             "area": "1",
             "interfaces": [
                 {
+                    "state": "up",
                     "router": "R1",
                     "protocols": [
                         "OSPF",
                         "MPLS"
                     ],
-                    "name": "g1/0"
+                    "name": "GigabitEthernet1/0"
                 },
                 {
+                    "state": "down",
+                    "name": "GigabitEthernet3/0"
+                },
+                {
+                    "state": "down",
+                    "name": "FastEthernet0/0"
+                },
+                {
+                    "state": "up",
                     "router": "R3",
                     "protocols": [
                         "OSPF",
                         "MPLS"
                     ],
-                    "name": "g2/0"
+                    "name": "GigabitEthernet2/0"
                 }
             ]
         },
@@ -52,20 +72,30 @@
             "area": "1",
             "interfaces": [
                 {
+                    "state": "up",
                     "router": "R2",
                     "protocols": [
                         "OSPF",
                         "MPLS"
                     ],
-                    "name": "g2/0"
+                    "name": "GigabitEthernet2/0"
                 },
                 {
+                    "state": "down",
+                    "name": "GigabitEthernet3/0"
+                },
+                {
+                    "state": "down",
+                    "name": "FastEthernet0/0"
+                },
+                {
+                    "state": "up",
                     "router": "R4",
                     "protocols": [
                         "OSPF",
                         "MPLS"
                     ],
-                    "name": "g1/0"
+                    "name": "GigabitEthernet1/0"
                 }
             ]
         },
@@ -75,20 +105,30 @@
             "area": "1",
             "interfaces": [
                 {
+                    "state": "down",
+                    "name": "GigabitEthernet3/0"
+                },
+                {
+                    "state": "down",
+                    "name": "FastEthernet0/0"
+                },
+                {
+                    "state": "up",
                     "router": "R1",
                     "protocols": [
                         "OSPF",
                         "MPLS"
                     ],
-                    "name": "g2/0"
+                    "name": "GigabitEthernet2/0"
                 },
                 {
+                    "state": "up",
                     "router": "R3",
                     "protocols": [
                         "OSPF",
                         "MPLS"
                     ],
-                    "name": "g2/0"
+                    "name": "GigabitEthernet1/0"
                 }
             ]
         }

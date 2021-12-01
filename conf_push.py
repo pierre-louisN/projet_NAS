@@ -5,20 +5,59 @@ if __name__ == "__main__":
 
     with open('data.json', 'r') as json_file:
         data = json.load(json_file)
-        print(data['routers'])
+        # print(data['routers'])
     # there is a file to push for each router to configure
-    j = 0
-    for i in data['routers']:
-        print("VOila le i \n", i)
+
+    for router_conf in data['routers']:
+        # print("VOila le i \n", i)
         path = "projet/"
-        path += str(i['name'])
+        path += str(router_conf['id'])
         fichier = open(path+".cfg", 'w+')
-        fichier.write("\nConfig test "+str(j))
-        j = j+1
+        fichier.write("!Config du routeur"+str(router_conf['name'])+"\n")
+        fichier.write("version 15.2\n")
+        fichier.write("service timestamps debug datetime msec\n")
+        fichier.write("service timestamps log datetime msec\n")
+        fichier.write("hostname "+str(router_conf['name']))
+        fichier.write("boot-start-marker\n")
+        fichier.write("boot-end-marker\n")
+        fichier.write("no aaa new-model\n")
+        fichier.write("no ip icmp rate-limit unreachable\n")
+        fichier.write("ip cef\n")
+        fichier.write("no ip domain lookup\n")
+        fichier.write("no ipv6 cef\n")
+        print("Routeur"+str(router_conf['name']))
+        for interface in router_conf['interfaces']:
+
+            # Integration de MPLS un peu tordu pour l'instant mais j'améliorerai après
+            mpls = False
+            if(str(interface['state']) == "up"):
+                for protocol in interface['protocols']:
+                    if (protocol == "MPLS"):
+                        mpls = True
+                        fichier.write("mpls label protocol ldp\n")
+
+                if (mpls):
+                    break
+        fichier.write("multilink bundle-name authenticated")
+        fichier.write("ip tcp synwait-time 5\n")
+
+        # Configuration des interfaces + addresse IP
+        fichier.write("!")
+        for interface in router_conf['interfaces']:
+            # interface qui sont down
+            fichier.write("! Config une interface \n")
+            if(str(interface['state']) == "down"):
+                fichier.write("! Cet interface est shutdown \n")
+                fichier.write("interface "+str(interface['name'])+"\n")
+                fichier.write(" no ip address\n")
+                fichier.write(" shutdown\n")
+                fichier.write(" duplex full\n")
+                fichier.write("! Fin config d interface \n")
+            # interface qui sont up
+            if(str(interface['state']) == "up"):
+                fichier.write("! Cet interface est up\n")
+                fichier.write("interface "+str(interface['name'])+"\n")
+
         fichier.close()
-
-    path = "projet/"
-    path += "node_id_1"
-    print(path)
-
-    print(fichier.readline())
+        """"Problème d'itération quand on write sur le fichier
+        le curseur va à la fin donc on ne peut pas ecrire dessus"""
