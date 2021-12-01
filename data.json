@@ -2,64 +2,92 @@
     "routers": [
         {
             "name": "R1",
+            "id": "node1_id",
             "area": "1",
             "interfaces": [
                 {
                     "router": "R2",
-                    "protocol": "OSPF",
+                    "protocols": [
+                        "OSPF",
+                        "MPLS"
+                    ],
                     "name": "g1/0"
                 },
                 {
                     "router": "R4",
-                    "protocol": "OSPF",
+                    "protocols": [
+                        "OSPF",
+                        "MPLS"
+                    ],
                     "name": "g2/0"
                 }
             ]
         },
         {
             "name": "R2",
+            "id": "node2_id",
             "area": "1",
             "interfaces": [
                 {
                     "router": "R1",
-                    "protocol": "OSPF",
+                    "protocols": [
+                        "OSPF",
+                        "MPLS"
+                    ],
                     "name": "g1/0"
                 },
                 {
                     "router": "R3",
-                    "protocol": "OSPF",
+                    "protocols": [
+                        "OSPF",
+                        "MPLS"
+                    ],
                     "name": "g2/0"
                 }
             ]
         },
         {
             "name": "R3",
+            "id": "node3_id",
             "area": "1",
             "interfaces": [
                 {
                     "router": "R2",
-                    "protocol": "OSPF",
+                    "protocols": [
+                        "OSPF",
+                        "MPLS"
+                    ],
                     "name": "g2/0"
                 },
                 {
                     "router": "R4",
-                    "protocol": "OSPF",
+                    "protocols": [
+                        "OSPF",
+                        "MPLS"
+                    ],
                     "name": "g1/0"
                 }
             ]
         },
         {
             "name": "R4",
+            "id": "node4_id",
             "area": "1",
             "interfaces": [
                 {
                     "router": "R1",
-                    "protocol": "OSPF",
+                    "protocols": [
+                        "OSPF",
+                        "MPLS"
+                    ],
                     "name": "g2/0"
                 },
                 {
                     "router": "R3",
-                    "protocol": "OSPF",
+                    "protocols": [
+                        "OSPF",
+                        "MPLS"
+                    ],
                     "name": "g2/0"
                 }
             ]
