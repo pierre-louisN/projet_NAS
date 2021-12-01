@@ -6,23 +6,33 @@ def config_telnet():
     HOST = "192.0.0.1"
     user = input("Enter your telnet username: ")
     password = getpass.getpass()
-
+    #on doit recuperer le area id mais pour l'instant il est à 0
+    area_id = 0
     tn = telnetlib.Telnet(HOST)
-    
+    interfaces=[]
     tn.read_until("Username: ")
     tn.write(user + "\n")
     tn.read_until("Password: ")
     if password:
-        print("ici\n")
+        #on configure OSPF
+        #attention on construit le process id et router id sur le dernier octet de l'ip
+        # si on a plusieurs sous reseau alors certains se retrouveront avec le meme router id
         tn.write(password + "\n")
+        host_parse = HOST.split(".")
+        process_id = host_parse[3]
         tn.write("enable\n")
         tn.write("cisco\n")
         tn.write("configure t\n")
-
-        #tn.write("int loop 0\n")
-        #tn.write("ip address 111.111.111.111 255.255.255.255\n")
+        tn.write("router ospf "+process_id)
+        router_id = process_id+"."+process_id+"."+process_id+"."+process_id
+        tn.write("router-id"+router_id)
         tn.write("end\n")
-        tn.write("exit\n")
+        #on active ospf
+        for interface in interfaces:
+            tn.write("conf t")
+            tn.write("interface "+interface)
+            tn.write("ip ospf "+process_id+"area "+aread_id)
+            tn.write("exit\n")
 
 
 def read_json():
