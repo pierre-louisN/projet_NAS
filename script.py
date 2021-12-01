@@ -1,24 +1,28 @@
 import json
+import getpass
+import telnetlib
 
+def config_telnet():
+    HOST = "192.0.0.1"
+    user = input("Enter your telnet username: ")
+    password = getpass.getpass()
 
-# HOST = "192.168.111.1"
-# user = raw_input("Enter your telnet username: ")
-# password = getpass.getpass()
+    tn = telnetlib.Telnet(HOST)
+    
+    tn.read_until("Username: ")
+    tn.write(user + "\n")
+    tn.read_until("Password: ")
+    if password:
+        print("ici\n")
+        tn.write(password + "\n")
+        tn.write("enable\n")
+        tn.write("cisco\n")
+        tn.write("configure t\n")
 
-# tn = telnetlib.Telnet(HOST)
-
-# tn.read_until("Username: ")
-# tn.write(user + "\n")
-# tn.read_until("Password: ")
-# if password:
-#  tn.write(password + "\n")
-#  tn.write("enable\n")
-#  tn.write("cisco\n")
-#  tn.write("configure t\n")
-#  tn.write("int loop 0\n")
-#  tn.write("ip address 111.111.111.111 255.255.255.255\n")
-#  tn.write("end\n")
-#  tn.write("exit\n")
+        #tn.write("int loop 0\n")
+        #tn.write("ip address 111.111.111.111 255.255.255.255\n")
+        tn.write("end\n")
+        tn.write("exit\n")
 
 
 def read_json():
@@ -39,6 +43,7 @@ def read_json():
 
 if __name__ == "__main__":
     print("Début main")
-    read_json()
+    #read_json()
+    config_telnet()
     print("Fin main")
 
