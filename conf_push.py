@@ -9,9 +9,11 @@ if __name__ == "__main__":
     # there is a file to push for each router to configure
 
     for router_conf in data['routers']:
-        # print("VOila le i \n", i)
-        path = "projet/"
+        # Commentaire à enlever pour le vrai test
+        path = "project-files/dynamips/"
         path += str(router_conf['id'])
+        #path += "/configs"
+        #path += "router "+str(router_conf['name'])+" configuration"
         fichier = open(path+".cfg", 'w+')
         fichier.write("!Config du routeur"+str(router_conf['name'])+"\n")
         fichier.write("version 15.2\n")
@@ -57,7 +59,41 @@ if __name__ == "__main__":
             if(str(interface['state']) == "up"):
                 fichier.write("! Cet interface est up\n")
                 fichier.write("interface "+str(interface['name'])+"\n")
+                fichier.write(" ip address 10.10.")
+                for link in data['links']:
+                    if(link['num'] == interface['link']):
+                        fichier.write(str(link['num'])+".")
+                        if(link['router1'] == router_conf['name']):
+                            fichier.write("1 ")
+                        if(link['router2'] == router_conf['name']):
+                            fichier.write("2 ")
+                        fichier.write("255.255.255.0\n")
+                if("OSPF" in interface['protocols']):
+                    fichier.write(" ip ospf 4444 area " +
+                                  str(router_conf['area'])+"\n")
+                    fichier.write(" negotition auto")
 
+        # Fin du fichier
+        fichier.write("!\n")
+        fichier.write("!\n")
+        fichier.write("!\n")
+        fichier.write("ip forward-protocol nd\n")
+        fichier.write("no ip http server\n")
+        fichier.write("control-plane\n")
+        fichier.write("line con 0\n")
+        fichier.write(" exec-timeout 0 0\n")
+        fichier.write(" privilege level 15\n")
+        fichier.write(" logging synchronous\n")
+        fichier.write(" stopbits 1\n")
+        fichier.write("line aux 0\n")
+        fichier.write(" exec-timeout 0 0\n")
+        fichier.write(" privilege level 15\n")
+        fichier.write(" logging synchronous\n")
+        fichier.write(" stopbits 1\n")
+        fichier.write("line vty 0 4\n")
+        fichier.write(" login\n")
+        fichier.write("end")
         fichier.close()
+
         """"Problème d'itération quand on write sur le fichier
         le curseur va à la fin donc on ne peut pas ecrire dessus"""
