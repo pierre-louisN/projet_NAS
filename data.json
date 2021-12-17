@@ -2,67 +2,169 @@
     "routers": [
         {
             "name": "R1",
+            "id": "node1_id",
             "area": "1",
             "interfaces": [
                 {
+                    "link": "1",
+                    "state": "up",
                     "router": "R2",
-                    "protocol": "OSPF",
-                    "name": "g1/0"
+                    "protocols": [
+                        "OSPF",
+                        "MPLS"
+                    ],
+                    "name": "GigabitEthernet1/0"
                 },
                 {
+                    "state": "down",
+                    "name": "GigabitEthernet3/0"
+                },
+                {
+                    "state": "down",
+                    "name": "FastEthernet0/0"
+                },
+                {
+                    "link": "4",
+                    "state": "up",
                     "router": "R4",
-                    "protocol": "OSPF",
-                    "name": "g2/0"
+                    "protocols": [
+                        "OSPF",
+                        "MPLS"
+                    ],
+                    "name": "GigabitEthernet2/0"
                 }
             ]
         },
         {
             "name": "R2",
+            "id": "node2_id",
             "area": "1",
             "interfaces": [
                 {
+                    "link": "1",
+                    "state": "up",
                     "router": "R1",
-                    "protocol": "OSPF",
-                    "name": "g1/0"
+                    "protocols": [
+                        "OSPF",
+                        "MPLS"
+                    ],
+                    "name": "GigabitEthernet1/0"
                 },
                 {
+                    "state": "down",
+                    "name": "GigabitEthernet3/0"
+                },
+                {
+                    "state": "down",
+                    "name": "FastEthernet0/0"
+                },
+                {
+                    "link": "2",
+                    "state": "up",
                     "router": "R3",
-                    "protocol": "OSPF",
-                    "name": "g2/0"
+                    "protocols": [
+                        "OSPF",
+                        "MPLS"
+                    ],
+                    "name": "GigabitEthernet2/0"
                 }
             ]
         },
         {
             "name": "R3",
+            "id": "node3_id",
             "area": "1",
             "interfaces": [
                 {
+                    "link": "2",
+                    "state": "up",
                     "router": "R2",
-                    "protocol": "OSPF",
-                    "name": "g2/0"
+                    "protocols": [
+                        "OSPF",
+                        "MPLS"
+                    ],
+                    "name": "GigabitEthernet2/0"
                 },
                 {
+                    "state": "down",
+                    "name": "GigabitEthernet3/0"
+                },
+                {
+                    "state": "down",
+                    "name": "FastEthernet0/0"
+                },
+                {
+                    "link": "3",
+                    "state": "up",
                     "router": "R4",
-                    "protocol": "OSPF",
-                    "name": "g1/0"
+                    "protocols": [
+                        "OSPF",
+                        "MPLS"
+                    ],
+                    "name": "GigabitEthernet1/0"
                 }
             ]
         },
         {
             "name": "R4",
+            "id": "node4_id",
             "area": "1",
             "interfaces": [
                 {
-                    "router": "R1",
-                    "protocol": "OSPF",
-                    "name": "g2/0"
+                    "state": "down",
+                    "name": "GigabitEthernet3/0"
                 },
                 {
+                    "state": "down",
+                    "name": "FastEthernet0/0"
+                },
+                {
+                    "link": "4",
+                    "state": "up",
+                    "router": "R1",
+                    "protocols": [
+                        "OSPF",
+                        "MPLS"
+                    ],
+                    "name": "GigabitEthernet2/0"
+                },
+                {
+                    "link": "3",
+                    "state": "up",
                     "router": "R3",
-                    "protocol": "OSPF",
-                    "name": "g2/0"
+                    "protocols": [
+                        "OSPF",
+                        "MPLS"
+                    ],
+                    "name": "GigabitEthernet1/0"
                 }
             ]
+        }
+    ],
+    "links": [
+        {
+            "id": "link-id1",
+            "router1": "R1",
+            "router2": "R2",
+            "num": "1"
+        },
+        {
+            "id": "link-id2",
+            "router1": "R2",
+            "router2": "R3",
+            "num": "2"
+        },
+        {
+            "id": "link-id3",
+            "router1": "R3",
+            "router2": "R4",
+            "num": "3"
+        },
+        {
+            "id": "link-id4",
+            "router1": "R1",
+            "router2": "R4",
+            "num": "4"
         }
     ]
 }
