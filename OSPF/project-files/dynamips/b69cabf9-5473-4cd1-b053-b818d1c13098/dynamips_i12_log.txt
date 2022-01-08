@@ -1,0 +1,37 @@
+Jan 03 19:39:55.570 HYPERVISOR: Release 0.2.17-amd64/Darwin (tag 2017072410)
+Jan 03 19:39:55.571 HYPERVISOR: Started on IP = localhost, TCP port = 57186.
+Jan 03 19:39:55.583 HYPERVISOR: exec_cmd: hypervisor version 
+Jan 03 19:39:55.588 HYPERVISOR: exec_cmd: hypervisor working_dir /Users/ghalisefrioui/4TC/projet_NAS/OSPF/project-files/dynamips 
+Jan 03 19:39:55.588 GENERAL: working_dir=/Users/ghalisefrioui/4TC/projet_NAS/OSPF/project-files/dynamips
+Jan 03 19:39:55.589 HYPERVISOR: exec_cmd: hypervisor working_dir /Users/ghalisefrioui/4TC/projet_NAS/OSPF/project-files/dynamips/5ea405d1-9545-4ee5-822f-811349198b57 
+Jan 03 19:39:55.589 GENERAL: working_dir=/Users/ghalisefrioui/4TC/projet_NAS/OSPF/project-files/dynamips/5ea405d1-9545-4ee5-822f-811349198b57
+Jan 03 19:39:55.589 HYPERVISOR: exec_cmd: vm create R9 9 c7200 
+Jan 03 19:39:55.590 VM: VM R9 created.
+Jan 03 19:39:55.591 HYPERVISOR: exec_cmd: vm set_con_tcp_port R9 5002 
+Jan 03 19:39:55.591 HYPERVISOR: exec_cmd: c7200 get_mac_addr R9 
+Jan 03 19:39:55.592 HYPERVISOR: exec_cmd: vm get_status R9 
+Jan 03 19:39:55.592 HYPERVISOR: exec_cmd: vm slot_add_binding R9 0 0 C7200-IO-FE 
+Jan 03 19:39:55.594 HYPERVISOR: exec_cmd: vm set_disk0 R9 0 
+Jan 03 19:39:55.595 HYPERVISOR: exec_cmd: vm get_status R9 
+Jan 03 19:39:55.595 HYPERVISOR: exec_cmd: vm set_idle_pc R9 0x6318687c 
+Jan 03 19:39:55.597 HYPERVISOR: exec_cmd: vm set_ios R9 /Users/ghalisefrioui/GNS3/images/IOS/c7200-advipservicesk9-mz.152-4.S5.image 
+Jan 03 19:39:55.598 HYPERVISOR: exec_cmd: c7200 set_mac_addr R9 ca09.91b8.0000 
+Jan 03 19:39:55.599 HYPERVISOR: exec_cmd: vm set_nvram R9 512 
+Jan 03 19:39:55.600 HYPERVISOR: exec_cmd: vm set_ram R9 512 
+Jan 03 19:39:55.601 HYPERVISOR: exec_cmd: vm get_status R9 
+Jan 03 19:39:55.602 HYPERVISOR: exec_cmd: vm slot_add_binding R9 1 0 PA-GE 
+Jan 03 19:39:55.603 HYPERVISOR: exec_cmd: vm get_status R9 
+Jan 03 19:39:55.603 HYPERVISOR: exec_cmd: vm slot_add_binding R9 2 0 PA-GE 
+Jan 03 19:39:55.606 HYPERVISOR: exec_cmd: vm set_con_tcp_port R9 5002 
+Jan 03 19:39:58.991 HYPERVISOR: exec_cmd: nio create_udp udp-d90490b2-95d0-4007-beac-c9127fc95fe2 10076 127.0.0.1 10077 
+Jan 03 19:39:59.214 HYPERVISOR: exec_cmd: vm slot_add_nio_binding R9 1 0 udp-d90490b2-95d0-4007-beac-c9127fc95fe2 
+Jan 03 19:39:59.215 HYPERVISOR: exec_cmd: vm get_status R9 
+Jan 03 20:26:09.852 HYPERVISOR: exec_cmd: vm get_status R9 
+Jan 03 20:26:09.854 HYPERVISOR: exec_cmd: vm extract_config R9 
+Jan 03 20:26:10.158 HYPERVISOR: exec_cmd: vm get_status R9 
+Jan 03 20:26:10.158 HYPERVISOR: exec_cmd: vm extract_config R9 
+Jan 03 20:26:10.159 HYPERVISOR: exec_cmd: vm delete R9 
+Jan 03 20:26:10.159 VM: VM R9 destroyed.
+Jan 03 20:26:10.161 HYPERVISOR: exec_cmd: hypervisor stop 
+Jan 03 20:26:10.489 HYPERVISOR: Stopped.
+Jan 03 20:26:10.489 GENERAL: reset done.

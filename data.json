@@ -3,8 +3,19 @@
         {
             "name": "R1",
             "id": "node1_id",
-            "area": "1",
+            "ospf_area_id": "1",
+            "ospf_process_id": "4444",
+            "folder_name":"eac7949e-e4ef-4d96-9db3-7144a07f6651",
             "interfaces": [
+                {
+                    "link": "0",
+                    "state": "up",
+                    "protocols": [
+                        "OSPF"
+                    ],
+                    "ospf_process_id": "4444",
+                    "name": "Loopback0"
+                },
                 {
                     "link": "1",
                     "state": "up",
@@ -13,6 +24,7 @@
                         "OSPF",
                         "MPLS"
                     ],
+                    "ospf_process_id": "4444",
                     "name": "GigabitEthernet1/0"
                 },
                 {
@@ -20,7 +32,12 @@
                     "name": "GigabitEthernet3/0"
                 },
                 {
-                    "state": "down",
+                    "link": "7",
+                    "state": "up",
+                    "protocols": [
+                        "OSPF",
+                        "MPLS"
+                    ],
                     "name": "FastEthernet0/0"
                 },
                 {
@@ -31,6 +48,7 @@
                         "OSPF",
                         "MPLS"
                     ],
+                    "ospf_process_id": "4444",
                     "name": "GigabitEthernet2/0"
                 }
             ]
@@ -38,8 +56,19 @@
         {
             "name": "R2",
             "id": "node2_id",
-            "area": "1",
+            "ospf_area_id": "1",
+            "ospf_process_id": "4444",
+            "folder_name":"5b2223c2-56a4-461d-871c-7530be57507f",
             "interfaces": [
+                {
+                    "link": "0",
+                    "state": "up",
+                    "protocols": [
+                        "OSPF"
+                    ],
+                    "ospf_process_id": "4444",
+                    "name": "Loopback0"
+                },
                 {
                     "link": "1",
                     "state": "up",
@@ -48,6 +77,7 @@
                         "OSPF",
                         "MPLS"
                     ],
+                    "ospf_process_id": "4444",
                     "name": "GigabitEthernet1/0"
                 },
                 {
@@ -66,6 +96,7 @@
                         "OSPF",
                         "MPLS"
                     ],
+                    "ospf_process_id": "4444",
                     "name": "GigabitEthernet2/0"
                 }
             ]
@@ -73,8 +104,17 @@
         {
             "name": "R3",
             "id": "node3_id",
-            "area": "1",
+            "ospf_area_id": "1",
             "interfaces": [
+                {
+                    "link": "0",
+                    "state": "up",
+                    "protocols": [
+                        "OSPF"
+                    ],
+                    "ospf_process_id": "4444",
+                    "name": "Loopback0"
+                },
                 {
                     "link": "2",
                     "state": "up",
@@ -83,6 +123,7 @@
                         "OSPF",
                         "MPLS"
                     ],
+                    "ospf_process_id": "4444",
                     "name": "GigabitEthernet2/0"
                 },
                 {
@@ -101,6 +142,7 @@
                         "OSPF",
                         "MPLS"
                     ],
+                    "ospf_process_id": "4444",
                     "name": "GigabitEthernet1/0"
                 }
             ]
@@ -108,8 +150,17 @@
         {
             "name": "R4",
             "id": "node4_id",
-            "area": "1",
+            "ospf_area_id": "1",
             "interfaces": [
+                {
+                    "link": "0",
+                    "state": "up",
+                    "protocols": [
+                        "OSPF"
+                    ],
+                    "ospf_process_id": "4444",
+                    "name": "Loopback0"
+                },
                 {
                     "state": "down",
                     "name": "GigabitEthernet3/0"
@@ -126,6 +177,7 @@
                         "OSPF",
                         "MPLS"
                     ],
+                    "ospf_process_id": "4444",
                     "name": "GigabitEthernet2/0"
                 },
                 {
@@ -136,7 +188,192 @@
                         "OSPF",
                         "MPLS"
                     ],
+                    "ospf_process_id": "4444",
                     "name": "GigabitEthernet1/0"
+                }
+            ]
+        },
+        {
+            "name": "R5",
+            "id": "node5_id",
+            "ospf_area_id": "1",
+            "interfaces": [
+                {
+                    "link": "0",
+                    "state": "up",
+                    "protocols": [
+                        "OSPF"
+                    ],
+                    "ospf_process_id": "4444",
+                    "name": "Loopback0"
+                },
+                {
+                    "link": "7",
+                    "state": "up",
+                    "router": "R1",
+                    "protocols": [
+                        "OSPF",
+                        "MPLS"
+                    ],
+                    "ospf_process_id": "4444",
+                    "name": "FastEthernet0/0"
+                },
+                {
+                    "state": "down",
+                    "name": "GigabitEthernet3/0"
+                },
+                {
+                    "state": "down",
+                    "name": "FastEthernet0/0"
+                },
+                {
+                    "link": "4",
+                    "state": "up",
+                    "router": "R4",
+                    "protocols": [
+                        "OSPF",
+                        "MPLS"
+                    ],
+                    "ospf_process_id": "4444",
+                    "name": "GigabitEthernet2/0"
+                }
+            ]
+        },
+        {
+            "name": "R1",
+            "id": "node1_id",
+            "ospf_area_id": "1",
+            "interfaces": [
+                {
+                    "link": "0",
+                    "state": "up",
+                    "protocols": [
+                        "OSPF"
+                    ],
+                    "ospf_process_id": "4444",
+                    "name": "Loopback0"
+                },
+                {
+                    "link": "1",
+                    "state": "up",
+                    "router": "R2",
+                    "protocols": [
+                        "OSPF",
+                        "MPLS"
+                    ],
+                    "ospf_process_id": "4444",
+                    "name": "GigabitEthernet1/0"
+                },
+                {
+                    "state": "down",
+                    "name": "GigabitEthernet3/0"
+                },
+                {
+                    "state": "down",
+                    "name": "FastEthernet0/0"
+                },
+                {
+                    "link": "4",
+                    "state": "up",
+                    "router": "R4",
+                    "protocols": [
+                        "OSPF",
+                        "MPLS"
+                    ],
+                    "ospf_process_id": "4444",
+                    "name": "GigabitEthernet2/0"
+                }
+            ]
+        },
+        {
+            "name": "R1",
+            "id": "node1_id",
+            "ospf_area_id": "1",
+            "interfaces": [
+                {
+                    "link": "0",
+                    "state": "up",
+                    "protocols": [
+                        "OSPF"
+                    ],
+                    "ospf_process_id": "4444",
+                    "name": "Loopback0"
+                },
+                {
+                    "link": "1",
+                    "state": "up",
+                    "router": "R2",
+                    "protocols": [
+                        "OSPF",
+                        "MPLS"
+                    ],
+                    "ospf_process_id": "4444",
+                    "name": "GigabitEthernet1/0"
+                },
+                {
+                    "state": "down",
+                    "name": "GigabitEthernet3/0"
+                },
+                {
+                    "state": "down",
+                    "name": "FastEthernet0/0"
+                },
+                {
+                    "link": "4",
+                    "state": "up",
+                    "router": "R4",
+                    "protocols": [
+                        "OSPF",
+                        "MPLS"
+                    ],
+                    "ospf_process_id": "4444",
+                    "name": "GigabitEthernet2/0"
+                }
+            ]
+        },
+        {
+            "name": "R1",
+            "id": "node1_id",
+            "ospf_area_id": "1",
+            "interfaces": [
+                {
+                    "link": "0",
+                    "state": "up",
+                    "protocols": [
+                        "OSPF"
+                    ],
+                    "ospf_process_id": "4444",
+                    "name": "Loopback0"
+                },
+                {
+                    "link": "1",
+                    "state": "up",
+                    "router": "R2",
+                    "protocols": [
+                        "OSPF",
+                        "MPLS"
+                    ],
+                    "ospf_process_id": "4444",
+                    "name": "GigabitEthernet1/0"
+                },
+                {
+                    "state": "down",
+                    "name": "GigabitEthernet3/0"
+                },
+                {
+                    "state": "down",
+                    "name": "FastEthernet0/0"
+                },
+                {
+                    "link": "4",
+                    "state": "up",
+                    "router": "R4",
+                    "protocols": [
+                        "OSPF",
+                        "MPLS"
+                    ],
+                    "ospf_process_id": "4444",
+                    "name": "GigabitEthernet2/0"
                 }
             ]
         }
@@ -165,6 +402,54 @@
             "router1": "R1",
             "router2": "R4",
             "num": "4"
+        },
+        {
+            "id": "link-id5",
+            "router1": "R1",
+            "router2": "R6",
+            "num": "5"
+        },
+        {
+            "id": "link-id6",
+            "router1": "R2",
+            "router2": "R6",
+            "num": "6"
+        },
+        {
+            "id": "link-id7",
+            "router1": "R1",
+            "router2": "R5",
+            "num": "7"
+        },
+        {
+            "id": "link-id8",
+            "router1": "R5",
+            "router2": "R2",
+            "num": "8"
+        },
+        {
+            "id": "link-id9",
+            "router1": "R3",
+            "router2": "R7",
+            "num": "9"
+        },
+        {
+            "id": "link-id10",
+            "router1": "R8",
+            "router2": "R3",
+            "num": "10"
+        },
+        {
+            "id": "link-id11",
+            "router1": "R1",
+            "router2": "R2",
+            "num": "11"
+        },
+        {
+            "id": "link-id12",
+            "router1": "R1",
+            "router2": "R5",
+            "num": "12"
         }
     ]
 }

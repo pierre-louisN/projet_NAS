@@ -1,0 +1,27 @@
+Jan 08 10:56:23.272 HYPERVISOR: Release 0.2.17-amd64/Darwin (tag 2017072410)
+Jan 08 10:56:23.274 HYPERVISOR: Started on IP = localhost, TCP port = 50195.
+Jan 08 10:56:23.278 HYPERVISOR: exec_cmd: hypervisor version 
+Jan 08 10:56:23.278 HYPERVISOR: exec_cmd: hypervisor working_dir /Users/ghalisefrioui/4TC/projet_NAS/OSPF/project-files/dynamips 
+Jan 08 10:56:23.278 GENERAL: working_dir=/Users/ghalisefrioui/4TC/projet_NAS/OSPF/project-files/dynamips
+Jan 08 10:56:23.279 HYPERVISOR: exec_cmd: hypervisor working_dir /Users/ghalisefrioui/4TC/projet_NAS/OSPF/project-files/dynamips/81affc97-d1a2-4285-a6cc-a2c26099074c 
+Jan 08 10:56:23.279 GENERAL: working_dir=/Users/ghalisefrioui/4TC/projet_NAS/OSPF/project-files/dynamips/81affc97-d1a2-4285-a6cc-a2c26099074c
+Jan 08 10:56:23.279 HYPERVISOR: exec_cmd: vm create R11 11 c7200 
+Jan 08 10:56:23.279 VM: VM R11 created.
+Jan 08 10:56:23.280 HYPERVISOR: exec_cmd: vm set_con_tcp_port R11 5009 
+Jan 08 10:56:23.280 HYPERVISOR: exec_cmd: c7200 get_mac_addr R11 
+Jan 08 10:56:23.280 HYPERVISOR: exec_cmd: vm get_status R11 
+Jan 08 10:56:23.281 HYPERVISOR: exec_cmd: vm slot_add_binding R11 0 0 C7200-IO-FE 
+Jan 08 10:56:23.282 HYPERVISOR: exec_cmd: vm set_disk0 R11 0 
+Jan 08 10:56:23.282 HYPERVISOR: exec_cmd: vm get_status R11 
+Jan 08 10:56:23.283 HYPERVISOR: exec_cmd: vm set_idle_pc R11 0x6318687c 
+Jan 08 10:56:23.284 HYPERVISOR: exec_cmd: vm set_ios R11 /Users/ghalisefrioui/GNS3/images/IOS/c7200-advipservicesk9-mz.152-4.S5.image 
+Jan 08 10:56:23.284 HYPERVISOR: exec_cmd: c7200 set_mac_addr R11 ca0b.0464.0000 
+Jan 08 10:56:23.285 HYPERVISOR: exec_cmd: vm set_nvram R11 512 
+Jan 08 10:56:23.285 HYPERVISOR: exec_cmd: vm set_ram R11 512 
+Jan 08 10:56:23.286 HYPERVISOR: exec_cmd: vm get_status R11 
+Jan 08 10:56:23.286 HYPERVISOR: exec_cmd: vm slot_add_binding R11 1 0 PA-GE 
+Jan 08 10:56:23.287 HYPERVISOR: exec_cmd: vm get_status R11 
+Jan 08 10:56:23.287 HYPERVISOR: exec_cmd: vm slot_add_binding R11 2 0 PA-GE 
+Jan 08 10:56:27.551 HYPERVISOR: exec_cmd: nio create_udp udp-0d409cb8-6bde-4eaa-9136-f9d392715e5a 10094 127.0.0.1 10095 
+Jan 08 10:56:27.776 HYPERVISOR: exec_cmd: vm slot_add_nio_binding R11 1 0 udp-0d409cb8-6bde-4eaa-9136-f9d392715e5a 
+Jan 08 10:56:27.777 HYPERVISOR: exec_cmd: vm get_status R11 
