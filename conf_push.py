@@ -66,7 +66,7 @@ def conf_interfaces(fichier, router_conf, data):
                         fichier.write("255.255.255.0\n")
             if("OSPF" in interface['protocols']):
                 fichier.write(
-                    " ip ospf " + interface["ospf_process_id"] + " area " + str(router_conf['opsf_area_id'])+"\n")
+                    " ip ospf " + router_conf["ospf_process_id"] + " area " + str(router_conf['ospf_area_id'])+"\n")
                 if (interface['link'] != "0"):
                     fichier.write(" negotition auto")
         # if("OSPF" in interface['protocols']):
