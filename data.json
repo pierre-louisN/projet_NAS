@@ -3,7 +3,7 @@
         {
             "name": "R1",
             "id": "node1_id",
-            "area": "1",
+            "opsf_router_id": "1",
             "interfaces": [
                 {
                     "link": "0",
@@ -11,7 +11,7 @@
                     "protocols": [
                         "OSPF"
                     ],
-                    "ospf_area": "4444",
+                    "ospf_process_id": "4444",
                     "name": "Loopback0"
                 },
                 {
@@ -22,7 +22,7 @@
                         "OSPF",
                         "MPLS"
                     ],
-                    "ospf_area": "4444",
+                    "ospf_process_id": "4444",
                     "name": "GigabitEthernet1/0"
                 },
                 {
@@ -41,7 +41,7 @@
                         "OSPF",
                         "MPLS"
                     ],
-                    "ospf_area": "4444",
+                    "ospf_process_id": "4444",
                     "name": "GigabitEthernet2/0"
                 }
             ]
@@ -49,7 +49,7 @@
         {
             "name": "R2",
             "id": "node2_id",
-            "area": "1",
+            "opsf_router_id": "1",
             "interfaces": [
                 {
                     "link": "0",
@@ -57,7 +57,7 @@
                     "protocols": [
                         "OSPF"
                     ],
-                    "ospf_area": "4444",
+                    "ospf_process_id": "4444",
                     "name": "Loopback0"
                 },
                 {
@@ -68,7 +68,7 @@
                         "OSPF",
                         "MPLS"
                     ],
-                    "ospf_area": "4444",
+                    "ospf_process_id": "4444",
                     "name": "GigabitEthernet1/0"
                 },
                 {
@@ -87,7 +87,7 @@
                         "OSPF",
                         "MPLS"
                     ],
-                    "ospf_area": "4444",
+                    "ospf_process_id": "4444",
                     "name": "GigabitEthernet2/0"
                 }
             ]
@@ -95,7 +95,7 @@
         {
             "name": "R3",
             "id": "node3_id",
-            "area": "1",
+            "opsf_router_id": "1",
             "interfaces": [
                 {
                     "link": "0",
@@ -103,7 +103,7 @@
                     "protocols": [
                         "OSPF"
                     ],
-                    "ospf_area": "4444",
+                    "ospf_process_id": "4444",
                     "name": "Loopback0"
                 },
                 {
@@ -114,7 +114,7 @@
                         "OSPF",
                         "MPLS"
                     ],
-                    "ospf_area": "4444",
+                    "ospf_process_id": "4444",
                     "name": "GigabitEthernet2/0"
                 },
                 {
@@ -133,7 +133,7 @@
                         "OSPF",
                         "MPLS"
                     ],
-                    "ospf_area": "4444",
+                    "ospf_process_id": "4444",
                     "name": "GigabitEthernet1/0"
                 }
             ]
@@ -141,7 +141,7 @@
         {
             "name": "R4",
             "id": "node4_id",
-            "area": "1",
+            "opsf_router_id": "1",
             "interfaces": [
                 {
                     "link": "0",
@@ -149,7 +149,7 @@
                     "protocols": [
                         "OSPF"
                     ],
-                    "ospf_area": "4444",
+                    "ospf_process_id": "4444",
                     "name": "Loopback0"
                 },
                 {
@@ -168,7 +168,7 @@
                         "OSPF",
                         "MPLS"
                     ],
-                    "ospf_area": "4444",
+                    "ospf_process_id": "4444",
                     "name": "GigabitEthernet2/0"
                 },
                 {
@@ -179,7 +179,7 @@
                         "OSPF",
                         "MPLS"
                     ],
-                    "ospf_area": "4444",
+                    "ospf_process_id": "4444",
                     "name": "GigabitEthernet1/0"
                 }
             ]
