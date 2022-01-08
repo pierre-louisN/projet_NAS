@@ -23,10 +23,12 @@ def conf_mpls(fichier, router_conf):
         # Integration de MPLS un peu tordu pour l'instant mais j'améliorerai après
         mpls = False
         if(str(interface['state']) == "up"):
-            for protocol in interface['protocols']:
-                if (protocol == "MPLS"):
-                    mpls = True
-                    fichier.write("mpls label protocol ldp\n")
+            print(interface['name'])
+            if ("protocols" in interface):
+                for protocol in interface['protocols']:
+                    if (protocol == "MPLS"):
+                        mpls = True
+                        fichier.write("mpls label protocol ldp\n")
 
             if (mpls):
                 break
@@ -64,11 +66,12 @@ def conf_interfaces(fichier, router_conf, data):
                         if(link['router2'] == router_conf['name']):
                             fichier.write("2 ")
                         fichier.write("255.255.255.0\n")
-            if("OSPF" in interface['protocols']):
-                fichier.write(
-                    " ip ospf " + router_conf["ospf_process_id"] + " area " + str(router_conf['ospf_area_id'])+"\n")
-                if (interface['link'] != "0"):
-                    fichier.write(" negotition auto")
+            if ("protocols" in interface):
+                if("OSPF" in interface['protocols']):
+                    fichier.write(
+                        " ip ospf " + router_conf["ospf_process_id"] + " area " + str(router_conf['ospf_area_id'])+"\n")
+                    if (interface['link'] != "0"):
+                        fichier.write(" negotition auto")
         # if("OSPF" in interface['protocols']):
 
 
