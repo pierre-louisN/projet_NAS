@@ -3,7 +3,7 @@
         {
             "name": "R1",
             "id": "node1_id",
-            "opsf_area_id": "1",
+            "ospf_area_id": "1",
             "interfaces": [
                 {
                     "link": "0",
@@ -54,7 +54,7 @@
         {
             "name": "R2",
             "id": "node2_id",
-            "opsf_area_id": "1",
+            "ospf_area_id": "1",
             "interfaces": [
                 {
                     "link": "0",
@@ -100,7 +100,7 @@
         {
             "name": "R3",
             "id": "node3_id",
-            "opsf_area_id": "1",
+            "ospf_area_id": "1",
             "interfaces": [
                 {
                     "link": "0",
@@ -146,7 +146,7 @@
         {
             "name": "R4",
             "id": "node4_id",
-            "opsf_area_id": "1",
+            "ospf_area_id": "1",
             "interfaces": [
                 {
                     "link": "0",
@@ -192,7 +192,7 @@
         {
             "name": "R5",
             "id": "node5_id",
-            "opsf_area_id": "1",
+            "ospf_area_id": "1",
             "interfaces": [
                 {
                     "link": "0",
@@ -238,7 +238,7 @@
         {
             "name": "R1",
             "id": "node1_id",
-            "opsf_area_id": "1",
+            "ospf_area_id": "1",
             "interfaces": [
                 {
                     "link": "0",
@@ -284,7 +284,7 @@
         {
             "name": "R1",
             "id": "node1_id",
-            "opsf_area_id": "1",
+            "ospf_area_id": "1",
             "interfaces": [
                 {
                     "link": "0",
@@ -330,7 +330,7 @@
         {
             "name": "R1",
             "id": "node1_id",
-            "opsf_area_id": "1",
+            "ospf_area_id": "1",
             "interfaces": [
                 {
                     "link": "0",
@@ -425,27 +425,27 @@
         },
         {
             "id": "link-id9",
-            "router1": "R1",
-            "router2": "R5",
-            "num": "1"
+            "router1": "R3",
+            "router2": "R7",
+            "num": "9"
         },
         {
             "id": "link-id10",
-            "router1": "R1",
-            "router2": "R5",
-            "num": "1"
+            "router1": "R8",
+            "router2": "R3",
+            "num": "10"
         },
         {
             "id": "link-id11",
             "router1": "R1",
-            "router2": "R5",
-            "num": "1"
+            "router2": "R2",
+            "num": "11"
         },
         {
             "id": "link-id12",
             "router1": "R1",
             "router2": "R5",
-            "num": "1"
+            "num": "12"
         }
     ]
 }
