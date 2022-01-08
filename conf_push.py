@@ -28,6 +28,8 @@ if __name__ == "__main__":
         fichier.write("no ip domain lookup\n")
         fichier.write("no ipv6 cef\n")
         print("Routeur"+str(router_conf['name']))
+        
+        
         for interface in router_conf['interfaces']:
 
             # Integration de MPLS un peu tordu pour l'instant mais j'améliorerai après
@@ -40,11 +42,11 @@ if __name__ == "__main__":
 
                 if (mpls):
                     break
-        fichier.write("multilink bundle-name authenticated")
+        fichier.write("multilink bundle-name authenticated\n")
         fichier.write("ip tcp synwait-time 5\n")
 
         # Configuration des interfaces + addresse IP
-        fichier.write("!")
+        fichier.write("!\n")
         for interface in router_conf['interfaces']:
             # interface qui sont down
             fichier.write("! Config une interface \n")
@@ -59,19 +61,27 @@ if __name__ == "__main__":
             if(str(interface['state']) == "up"):
                 fichier.write("! Cet interface est up\n")
                 fichier.write("interface "+str(interface['name'])+"\n")
-                fichier.write(" ip address 10.10.")
-                for link in data['links']:
-                    if(link['num'] == interface['link']):
-                        fichier.write(str(link['num'])+".")
-                        if(link['router1'] == router_conf['name']):
-                            fichier.write("1 ")
-                        if(link['router2'] == router_conf['name']):
-                            fichier.write("2 ")
-                        fichier.write("255.255.255.0\n")
+                #Différencier Loopback des autres addresse ip 
+                if (interface['link']=="0"):
+                    fichier.write(" ip addresse ")
+                    rout = router_conf['name']
+                    rout_num = rout[1:]
+                    fichier.write(rout_num+"."+rout_num+"."+rout_num+"."+rout_num+"\n")
+                else:
+                    fichier.write(" ip address 10.10.")
+                    for link in data['links']:
+                        if(link['num'] == interface['link']):
+                            fichier.write(str(link['num'])+".")
+                            if(link['router1'] == router_conf['name']):
+                                fichier.write("1 ")
+                            if(link['router2'] == router_conf['name']):
+                                fichier.write("2 ")
+                            fichier.write("255.255.255.0\n")
                 if("OSPF" in interface['protocols']):
-                    fichier.write(" ip ospf 4444 area " +
-                                  str(router_conf['area'])+"\n")
-                    fichier.write(" negotition auto")
+                    fichier.write(" ip ospf "+ interface["ospf_area"] +" area " + str(router_conf['area'])+"\n")
+                    if (interface['link']!="0"):
+                        fichier.write(" negotition auto")
+            # if("OSPF" in interface['protocols']):
 
         # Fin du fichier
         fichier.write("!\n")

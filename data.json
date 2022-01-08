@@ -6,6 +6,15 @@
             "area": "1",
             "interfaces": [
                 {
+                    "link": "0",
+                    "state": "up",
+                    "protocols": [
+                        "OSPF"
+                    ],
+                    "ospf_area": "4444",
+                    "name": "Loopback0"
+                },
+                {
                     "link": "1",
                     "state": "up",
                     "router": "R2",
@@ -13,6 +22,7 @@
                         "OSPF",
                         "MPLS"
                     ],
+                    "ospf_area": "4444",
                     "name": "GigabitEthernet1/0"
                 },
                 {
@@ -31,6 +41,7 @@
                         "OSPF",
                         "MPLS"
                     ],
+                    "ospf_area": "4444",
                     "name": "GigabitEthernet2/0"
                 }
             ]
@@ -41,6 +52,15 @@
             "area": "1",
             "interfaces": [
                 {
+                    "link": "0",
+                    "state": "up",
+                    "protocols": [
+                        "OSPF"
+                    ],
+                    "ospf_area": "4444",
+                    "name": "Loopback0"
+                },
+                {
                     "link": "1",
                     "state": "up",
                     "router": "R1",
@@ -48,6 +68,7 @@
                         "OSPF",
                         "MPLS"
                     ],
+                    "ospf_area": "4444",
                     "name": "GigabitEthernet1/0"
                 },
                 {
@@ -66,6 +87,7 @@
                         "OSPF",
                         "MPLS"
                     ],
+                    "ospf_area": "4444",
                     "name": "GigabitEthernet2/0"
                 }
             ]
@@ -76,6 +98,15 @@
             "area": "1",
             "interfaces": [
                 {
+                    "link": "0",
+                    "state": "up",
+                    "protocols": [
+                        "OSPF"
+                    ],
+                    "ospf_area": "4444",
+                    "name": "Loopback0"
+                },
+                {
                     "link": "2",
                     "state": "up",
                     "router": "R2",
@@ -83,6 +114,7 @@
                         "OSPF",
                         "MPLS"
                     ],
+                    "ospf_area": "4444",
                     "name": "GigabitEthernet2/0"
                 },
                 {
@@ -101,6 +133,7 @@
                         "OSPF",
                         "MPLS"
                     ],
+                    "ospf_area": "4444",
                     "name": "GigabitEthernet1/0"
                 }
             ]
@@ -110,6 +143,15 @@
             "id": "node4_id",
             "area": "1",
             "interfaces": [
+                {
+                    "link": "0",
+                    "state": "up",
+                    "protocols": [
+                        "OSPF"
+                    ],
+                    "ospf_area": "4444",
+                    "name": "Loopback0"
+                },
                 {
                     "state": "down",
                     "name": "GigabitEthernet3/0"
@@ -126,6 +168,7 @@
                         "OSPF",
                         "MPLS"
                     ],
+                    "ospf_area": "4444",
                     "name": "GigabitEthernet2/0"
                 },
                 {
@@ -136,6 +179,7 @@
                         "OSPF",
                         "MPLS"
                     ],
+                    "ospf_area": "4444",
                     "name": "GigabitEthernet1/0"
                 }
             ]

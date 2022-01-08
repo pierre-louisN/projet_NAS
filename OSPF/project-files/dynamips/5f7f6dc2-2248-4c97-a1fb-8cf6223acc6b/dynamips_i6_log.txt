@@ -1,0 +1,34 @@
+Nov 23 16:42:04.314 HYPERVISOR: Release 0.2.17-x86/Windows (tag 2017072410)
+Nov 23 16:42:04.314 HYPERVISOR: Started on IP = localhost, TCP port = 57257.
+Nov 23 16:42:04.775 HYPERVISOR: exec_cmd: hypervisor version 
+Nov 23 16:42:04.775 HYPERVISOR: exec_cmd: hypervisor working_dir C:\Users\sabti\GNS3\projects\OSPF\project-files\dynamips 
+Nov 23 16:42:04.775 GENERAL: working_dir=C:\Users\sabti\GNS3\projects\OSPF\project-files\dynamips
+Nov 23 16:42:04.775 HYPERVISOR: exec_cmd: hypervisor working_dir C:\Users\sabti\GNS3\projects\OSPF\project-files\dynamips\5f7f6dc2-2248-4c97-a1fb-8cf6223acc6b 
+Nov 23 16:42:04.783 GENERAL: working_dir=C:\Users\sabti\GNS3\projects\OSPF\project-files\dynamips\5f7f6dc2-2248-4c97-a1fb-8cf6223acc6b
+Nov 23 16:42:04.783 HYPERVISOR: exec_cmd: vm create R6 6 c7200 
+Nov 23 16:42:04.783 VM: VM R6 created.
+Nov 23 16:42:04.783 HYPERVISOR: exec_cmd: vm set_con_tcp_port R6 5005 
+Nov 23 16:42:04.783 HYPERVISOR: exec_cmd: c7200 get_mac_addr R6 
+Nov 23 16:42:04.783 HYPERVISOR: exec_cmd: vm get_status R6 
+Nov 23 16:42:04.783 HYPERVISOR: exec_cmd: vm slot_add_binding R6 0 0 C7200-IO-FE 
+Nov 23 16:42:04.791 HYPERVISOR: exec_cmd: vm set_ios R6 C:/Users/sabti/GNS3/images/IOS/c7200-advipservicesk9-mz.152-4.S5.image 
+Nov 23 16:42:04.791 HYPERVISOR: exec_cmd: vm set_exec_area R6 64 
+Nov 23 16:42:04.791 HYPERVISOR: exec_cmd: vm set_ram R6 512 
+Nov 23 16:42:04.791 HYPERVISOR: exec_cmd: vm set_nvram R6 512 
+Nov 23 16:42:04.791 HYPERVISOR: exec_cmd: vm set_disk0 R6 0 
+Nov 23 16:42:04.791 HYPERVISOR: exec_cmd: vm get_status R6 
+Nov 23 16:42:04.791 HYPERVISOR: exec_cmd: vm slot_add_binding R6 1 0 PA-GE 
+Nov 23 16:42:04.791 HYPERVISOR: exec_cmd: vm get_status R6 
+Nov 23 16:42:04.791 HYPERVISOR: exec_cmd: vm slot_add_binding R6 2 0 PA-GE 
+Nov 23 16:42:04.935 HYPERVISOR: exec_cmd: vm set_ios R6 C:/Users/sabti/GNS3/images/IOS/c7200-advipservicesk9-mz.152-4.S5.image 
+Nov 23 16:42:08.950 HYPERVISOR: exec_cmd: vm set_ios R6 C:/Users/sabti/GNS3/images/IOS/c7200-advipservicesk9-mz.152-4.S5.image 
+Nov 23 16:46:04.739 HYPERVISOR: exec_cmd: vm get_status R6 
+Nov 23 16:46:04.747 HYPERVISOR: exec_cmd: vm set_idle_pc R6 0x6318687c 
+Nov 23 16:50:44.958 HYPERVISOR: exec_cmd: nio create_udp udp-b2e1f8ab-3dc7-4865-bdcd-b4daaad43d88 10028 127.0.0.1 10029 
+Nov 23 16:50:45.239 HYPERVISOR: exec_cmd: vm slot_add_nio_binding R6 1 0 udp-b2e1f8ab-3dc7-4865-bdcd-b4daaad43d88 
+Nov 23 16:50:45.239 HYPERVISOR: exec_cmd: vm get_status R6 
+Nov 23 16:51:40.790 HYPERVISOR: exec_cmd: nio create_udp udp-37b08f06-352c-4e9a-831c-52a400f90e87 10032 127.0.0.1 10033 
+Nov 23 16:51:40.790 HYPERVISOR: exec_cmd: vm slot_add_nio_binding R6 0 0 udp-37b08f06-352c-4e9a-831c-52a400f90e87 
+Nov 23 16:51:40.798 HYPERVISOR: exec_cmd: vm get_status R6 
+Nov 23 17:45:38.752 HYPERVISOR: exec_cmd: vm get_status R6 
+Nov 23 17:45:38.752 HYPERVISOR: exec_cmd: vm extract_config R6 
