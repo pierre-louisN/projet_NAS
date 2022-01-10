@@ -7,7 +7,7 @@ def conf_basic(fichier, router_conf):
     fichier.write("version 15.2\n")
     fichier.write("service timestamps debug datetime msec\n")
     fichier.write("service timestamps log datetime msec\n")
-    fichier.write("hostname "+str(router_conf['name']))
+    fichier.write("hostname "+str(router_conf['name'])+"\n")
     fichier.write("boot-start-marker\n")
     fichier.write("boot-end-marker\n")
     fichier.write("no aaa new-model\n")
@@ -34,45 +34,53 @@ def conf_mpls(fichier, router_conf):
                 break
 
 
+def conf_inter_down(fichier, router_conf, interface):
+    fichier.write("! Cet interface est shutdown \n")
+    fichier.write("interface "+str(interface['name'])+"\n")
+    fichier.write(" no ip address\n")
+    fichier.write(" shutdown\n")
+    fichier.write(" duplex full\n")
+    fichier.write("! Fin config d interface \n")
+
+
+def conf_inter_up(fichier, router_conf, data, interface):
+    fichier.write("! Cet interface est up\n")
+    fichier.write("interface "+str(interface['name'])+"\n")
+    # Différencier Loopback des autres addresse ip
+    if (interface['link'] == "0"):
+        fichier.write(" ip addresse ")
+        rout = router_conf['name']
+        rout_num = rout[1:]
+        fichier.write(rout_num+"."+rout_num+"." +
+                      rout_num+"."+rout_num+"\n")
+    else:
+        fichier.write(" ip address 10.10.")
+        for link in data['links']:
+            if(link['num'] == interface['link']):
+                fichier.write(str(link['num'])+".")
+                if(link['router1'] == router_conf['name']):
+                    fichier.write("1 ")
+                if(link['router2'] == router_conf['name']):
+                    fichier.write("2 ")
+                fichier.write("255.255.255.0\n")
+    if ("protocols" in interface):
+        if("OSPF" in interface['protocols']):
+            fichier.write(
+                " ip ospf " + router_conf["ospf_process_id"] + " area " + str(router_conf['ospf_area_id'])+"\n")
+            if (interface['link'] != "0"):
+                fichier.write(" negotition auto\n")
+
+
 def conf_interfaces(fichier, router_conf, data):
     for interface in router_conf['interfaces']:
         # interface qui sont down
         fichier.write("! Config une interface \n")
         if(str(interface['state']) == "down"):
-            fichier.write("! Cet interface est shutdown \n")
-            fichier.write("interface "+str(interface['name'])+"\n")
-            fichier.write(" no ip address\n")
-            fichier.write(" shutdown\n")
-            fichier.write(" duplex full\n")
-            fichier.write("! Fin config d interface \n")
+            conf_inter_down(fichier, router_conf, interface)
+
         # interface qui sont up
         if(str(interface['state']) == "up"):
-            fichier.write("! Cet interface est up\n")
-            fichier.write("interface "+str(interface['name'])+"\n")
-            # Différencier Loopback des autres addresse ip
-            if (interface['link'] == "0"):
-                fichier.write(" ip addresse ")
-                rout = router_conf['name']
-                rout_num = rout[1:]
-                fichier.write(rout_num+"."+rout_num+"." +
-                              rout_num+"."+rout_num+"\n")
-            else:
-                fichier.write(" ip address 10.10.")
-                for link in data['links']:
-                    if(link['num'] == interface['link']):
-                        fichier.write(str(link['num'])+".")
-                        if(link['router1'] == router_conf['name']):
-                            fichier.write("1 ")
-                        if(link['router2'] == router_conf['name']):
-                            fichier.write("2 ")
-                        fichier.write("255.255.255.0\n")
-            if ("protocols" in interface):
-                if("OSPF" in interface['protocols']):
-                    fichier.write(
-                        " ip ospf " + router_conf["ospf_process_id"] + " area " + str(router_conf['ospf_area_id'])+"\n")
-                    if (interface['link'] != "0"):
-                        fichier.write(" negotition auto")
-        # if("OSPF" in interface['protocols']):
+            conf_inter_up(fichier, router_conf, data, interface)
 
 
 def conf_end(fichier):
@@ -98,10 +106,27 @@ def conf_end(fichier):
     fichier.write("end")
 
 
+def conf_bgp(fichier, router_conf, data):
+    fichier.write("router bgp "+router_conf["bgp_as"]+"\n")
+    ind = router_conf["name"]
+    addresse_loop = ind[1:]+"."+ind[1:]+"."+ind[1:]+"."+ind[1:]
+    fichier.write("bgp router-id " + addresse_loop + "\n")
+    fichier.write(" bgp log-neighbor-changes\n")
+
+    for other_router in data["routers"]:
+        if (router_conf["name"] != other_router["name"]) & ("bgp_as" in other_router):
+            ind = other_router["name"]
+            addresse_loop = ind[1:]+"."+ind[1:]+"."+ind[1:]+"."+ind[1:]
+            fichier.write("neighbor "+addresse_loop +
+                          " remote-as "+other_router["bgp_as"]+"\n")
+            fichier.write("neighbor "+addresse_loop +
+                          "update-source Loopback0\n")
+
+
 if __name__ == "__main__":
     print('Début')
 
-    with open('data.json', 'r') as json_file:
+    with open('data_cop.json', 'r') as json_file:
         data = json.load(json_file)
         # print(data['routers'])
     # there is a file to push for each router to configure
@@ -125,6 +150,8 @@ if __name__ == "__main__":
         fichier.write("!\n")
 
         conf_interfaces(fichier, router_conf, data)
+        if "bgp_as" in router_conf:
+            conf_bgp(fichier, router_conf, data)
         conf_end(fichier)
 
         fichier.close()
