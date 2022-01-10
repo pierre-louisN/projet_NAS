@@ -5,6 +5,7 @@
             "id": "node1_id",
             "ospf_area_id": "1",
             "ospf_process_id": "4444",
+            "bgp_as": "110",
             "interfaces": [
                 {
                     "link": "0",
@@ -58,6 +59,7 @@
         {
             "name": "R2",
             "id": "node2_id",
+            "bgp_as": "110",
             "ospf_area_id": "1",
             "ospf_process_id": "4444",
             "interfaces": [
@@ -113,6 +115,7 @@
         {
             "name": "R3",
             "id": "node3_id",
+            "bgp_as": "110",
             "ospf_area_id": "1",
             "ospf_process_id": "4444",
             "interfaces": [
@@ -168,6 +171,7 @@
         {
             "name": "R4",
             "id": "node4_id",
+            "bgp_as": "110",
             "ospf_area_id": "1",
             "ospf_process_id": "4444",
             "interfaces": [
@@ -223,6 +227,7 @@
         {
             "name": "R5",
             "id": "node5_id",
+            "bgp_as": "110",
             "ospf_area_id": "1",
             "ospf_process_id": "4444",
             "interfaces": [
@@ -264,6 +269,7 @@
         {
             "name": "R6",
             "id": "node6_id",
+            "bgp_as": "110",
             "ospf_area_id": "1",
             "ospf_process_id": "4444",
             "interfaces": [
@@ -304,6 +310,7 @@
         {
             "name": "R7",
             "id": "node7_id",
+            "bgp_as": "110",
             "ospf_area_id": "1",
             "ospf_process_id": "4444",
             "interfaces": [
@@ -341,6 +348,7 @@
         {
             "name": "R8",
             "id": "node8_id",
+            "bgp_as": "110",
             "ospf_area_id": "1",
             "ospf_process_id": "4444",
             "interfaces": [
