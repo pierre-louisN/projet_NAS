@@ -10,9 +10,7 @@ def get_routerID(router_num) :
     router_id = router_id_base+b'.'+router_id_base+b'.'+router_id_base+b'.'+router_id_base
     return router_id
 
-def get_subnet_num(link_num,router_name):
-     with open('data.json') as json_file:
-        data = json.load(json_file)
+def get_subnet_num(link_num,router_name,data):
         for link in data['links']:
             if(link['num']==link_num):
                 if(link['router1']==router_name):
@@ -21,14 +19,7 @@ def get_subnet_num(link_num,router_name):
                     return 2
 
 
-def get_neighbors(as_number,router_name,data) :
-    tab = []
-    for router in data["routers"]:
-            if(router['name']!=router_name and router["bgp_as"]==as_number):
-                tab.append(get_routerID(router['name'][1:]))
-    return tab
-
-def config_interface(tn,interface_name,link_num,router_name):
+def config_interface(tn,interface_name,link_num,router_name,data):
     router_num = router_name[1:]
     tn.write(b'configure terminal \r')
     
@@ -37,8 +28,8 @@ def config_interface(tn,interface_name,link_num,router_name):
     if(interface_name=="Loopback0"):
         tn.write(b'ip address '+get_routerID(router_num)+b' 255.255.255.255 \r')
     else :
-        subnet_num = str(get_subnet_num(link_num,router_name))
-        print("dernier chiffre = "+subnet_num)
+        subnet_num = str(get_subnet_num(link_num,router_name,data))
+        #print("dernier chiffre = "+subnet_num)
         tn.write(b'ip address 10.10.'+link_num.encode('ascii')+b'.'+subnet_num.encode('ascii')+b' 255.255.255.0 \r')
     
     tn.write(b'no shutdown \r')
@@ -75,18 +66,6 @@ def config_OSPF(tn,interface_name,process_id,area_id):
     tn.write(b'end \r')
     #tn.write(b'cisco\r')
 
-#desactive ospf sur une interface 
-def deconfig_OSPF(tn, interface_name,process_id,area_id):
-    tn.write(b'enable \r')
-    tn.write(b'conf t \r')
-    tn.write(b'interface '+interface_name.encode('ascii')+b' \r')
-    tn.write((b'no ip ospf ')+process_id.encode('ascii')+(b' area ')+area_id.encode('ascii')+b' \r')
-    tn.write(b' \r ')
-    time.sleep(1)
-    tn.write(b'end \r')
-
-
-
 def config_MPLS(tn,interface_name):
     tn.write(b"conf t \r")
     tn.write(b"interface "+interface_name.encode('ascii')+b' \r')
@@ -96,10 +75,13 @@ def config_MPLS(tn,interface_name):
     tn.write(b' \r ')
     tn.write(b"end \r")
 
-def deconfig_MPLS(tn, interface_name):
-    tn.write(b"conf t \r")
-    tn.write(b"interface "+interface_name.encode('ascii')+b' \r')
-    tn.write(b'no mpls ip \r')
+#retourne le nom de tous les voisins (ceux qui ont le même numéro)
+def get_neighbors(as_number,router_name,data) :
+    tab = []
+    for router in data["routers"]:
+            if(router['name']!=router_name and router["bgp_as"]==as_number):
+                tab.append(get_routerID(router['name'][1:]))
+    return tab
 
 
 def config_BGP(tn,as_number,router_name,data):
@@ -113,10 +95,6 @@ def config_BGP(tn,as_number,router_name,data):
     tn.write(b"end\r")
     time.sleep(1)
     tn.write(b' \r ')
-
-def deconfig_BGP(tn,as_number,router_name):
-    tn.write(b"conf t \r")
-    tn.write(b"no router bgp "+as_number+"\r")
 
 def config_telnet():
 #   os.system("rm /home/strack/GNS3/projects/test/project-files/dynamips/c408e2c4-a1c6-4fcd-9c09-2a86e9afc405/configs/i2_startup-config.cfg")
@@ -181,6 +159,24 @@ def config_telnet():
                 continue
 
 
+
+def deconfig_OSPF(tn, interface_name,process_id,area_id):
+    tn.write(b'enable \r')
+    tn.write(b'conf t \r')
+    tn.write(b'interface '+interface_name.encode('ascii')+b' \r')
+    tn.write((b'no ip ospf ')+process_id.encode('ascii')+(b' area ')+area_id.encode('ascii')+b' \r')
+    tn.write(b' \r ')
+    time.sleep(1)
+    tn.write(b'end \r')
+
+def deconfig_MPLS(tn, interface_name):
+    tn.write(b"conf t \r")
+    tn.write(b"interface "+interface_name.encode('ascii')+b' \r')
+    tn.write(b'no mpls ip \r')
+
+def deconfig_BGP(tn,as_number,router_name):
+    tn.write(b"conf t \r")
+    tn.write(b"no router bgp "+as_number+"\r")
 
 def get_ancien_json(name):
     with open(name) as json_file:
