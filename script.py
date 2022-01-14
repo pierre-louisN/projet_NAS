@@ -3,8 +3,13 @@ import getpass
 import telnetlib
 import os
 import time 
+<<<<<<< Updated upstream
 
 #donne l'adresse Loopback d'un routeur, ex : R1 => 1.1.1.1
+=======
+from jsondiff import diff
+
+>>>>>>> Stashed changes
 def get_routerID(router_num) :
     router_id_base=router_num.encode('ascii')
     router_id = router_id_base+b'.'+router_id_base+b'.'+router_id_base+b'.'+router_id_base
@@ -19,7 +24,18 @@ def get_subnet_num(link_num,router_name,data):
                     return 2
 
 
+<<<<<<< Updated upstream
 def config_interface(tn,interface_name,link_num,router_name,data):
+=======
+def get_neighbors(as_number,router_name,data) :
+    tab = []
+    for router in data["routers"]:
+            if(router['name']!=router_name and router["bgp_as"]==as_number):
+                tab.append(get_routerID(router['name'][1:]))
+    return tab
+
+def config_interface(tn,interface_name,link_num,router_name):
+>>>>>>> Stashed changes
     router_num = router_name[1:]
     tn.write(b'configure terminal \r')
     
@@ -66,6 +82,18 @@ def config_OSPF(tn,interface_name,process_id,area_id):
     tn.write(b'end \r')
     #tn.write(b'cisco\r')
 
+#desactive ospf sur une interface 
+def deconfig_OSPF(tn, interface_name,process_id,area_id):
+    tn.write(b'enable \r')
+    tn.write(b'conf t \r')
+    tn.write(b'interface '+interface_name.encode('ascii')+b' \r')
+    tn.write((b'no ip ospf ')+process_id.encode('ascii')+(b' area ')+area_id.encode('ascii')+b' \r')
+    tn.write(b' \r ')
+    time.sleep(1)
+    tn.write(b'end \r')
+
+
+
 def config_MPLS(tn,interface_name):
     tn.write(b"conf t \r")
     tn.write(b"interface "+interface_name.encode('ascii')+b' \r')
@@ -75,6 +103,7 @@ def config_MPLS(tn,interface_name):
     tn.write(b' \r ')
     tn.write(b"end \r")
 
+<<<<<<< Updated upstream
 #retourne le nom de tous les voisins (ceux qui ont le même numéro)
 def get_neighbors(as_number,router_name,data) :
     tab = []
@@ -86,6 +115,16 @@ def get_neighbors(as_number,router_name,data) :
 
 def config_BGP(tn,as_number,router_name,data):
     tn.write(b"conf t \r")
+=======
+def deconfig_MPLS(tn, interface_name):
+    tn.write(b"conf t \r")
+    tn.write(b"interface "+interface_name.encode('ascii')+b' \r')
+    tn.write(b'no mpls ip \r')
+
+
+def config_BGP(tn,as_number,router_name,data):
+    tn.write(b"conf t \r")
+>>>>>>> Stashed changes
     tn.write(b"router bgp "+as_number.encode('ascii')+b" \r")
     tn.write(b"no sync \r")
     neighbors = get_neighbors(as_number,router_name,data) #récupére les voisins 
@@ -95,6 +134,10 @@ def config_BGP(tn,as_number,router_name,data):
     tn.write(b"end\r")
     time.sleep(1)
     tn.write(b' \r ')
+
+def deconfig_BGP(tn,as_number,router_name):
+    tn.write(b"conf t \r")
+    tn.write(b"no router bgp "+as_number+"\r")
 
 def config_telnet():
 #   os.system("rm /home/strack/GNS3/projects/test/project-files/dynamips/c408e2c4-a1c6-4fcd-9c09-2a86e9afc405/configs/i2_startup-config.cfg")
@@ -157,6 +200,60 @@ def config_telnet():
             #si on arrive pas à se connecter au routeur 
             except ConnectionRefusedError:
                 continue
+<<<<<<< Updated upstream
+=======
+
+
+
+def get_ancien_json(name):
+    with open(name) as json_file:
+        data = json.load(json_file)
+        return data
+
+#sort json then return true if they are equal
+def has_a_diff(json1, json2):
+    json1 = json.dumps(json1, sort_keys=True)
+    json2 = json.dumps(json2, sort_keys=True)
+
+    return (json1==json2)
+
+#return a specific json with the same id 
+def search_name( json1,group,name):
+   
+    return [obj for obj in json1 if obj[group]==name]
+
+def maj():
+
+
+    with open('data_cop.json') as json_file:
+        data = json.load(json_file)
+
+        ancien_data=get_ancien_json('data.json')
+        
+        for router_conf in data['routers']:
+            port = 5000 + (int)(router_conf['name'][1:]) - 1 
+            print("Router "+router_conf['name']+" port n° : " + str(port))
+
+            #get the router with the same name 
+            samerouter= search_name(ancien_data['routers'],'name',router_conf['name'])
+            if (samerouter):
+                with telnetlib.Telnet(HOST, port) as tn:
+                    tn.set_debuglevel(1)
+
+                    for i in range (1,5):
+                            tn.write(b'\r')  
+
+                    for interface in router_conf['interfaces']:
+                        sameinterface = search_name(samerouter_a,'link',interface['link'])
+                        for interface2 in ancien_data['routers']['interfaces']:
+                            if (interface['name']==interface2['name']):
+                                if(has_a_diff(interface['name'],interface['name'])):
+                                    deconfig_interface(tn,interface)
+            
+
+
+
+>>>>>>> Stashed changes
 
 if __name__ == "__main__":
     print("Début main")
