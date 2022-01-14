@@ -3,6 +3,8 @@
         {
             "name": "R1",
             "id": "node1_id",
+            "type": "P",
+            "port": "5001",
             "ospf_area_id": "1",
             "ospf_process_id": "4444",
             "bgp_as": "110",
@@ -59,6 +61,8 @@
         {
             "name": "R2",
             "id": "node2_id",
+            "type": "P",
+            "port": "5002",
             "bgp_as": "110",
             "ospf_area_id": "1",
             "ospf_process_id": "4444",
@@ -115,6 +119,8 @@
         {
             "name": "R3",
             "id": "node3_id",
+            "type": "P",
+            "port": "5003",
             "bgp_as": "110",
             "ospf_area_id": "1",
             "ospf_process_id": "4444",
@@ -171,6 +177,8 @@
         {
             "name": "R4",
             "id": "node4_id",
+            "type": "P",
+            "port": "5004",
             "bgp_as": "110",
             "ospf_area_id": "1",
             "ospf_process_id": "4444",
@@ -227,6 +235,8 @@
         {
             "name": "R5",
             "id": "node5_id",
+            "port": "5005",
+            "type": "PE",
             "bgp_as": "110",
             "ospf_area_id": "1",
             "ospf_process_id": "4444",
@@ -251,7 +261,9 @@
                     "name": "GigabitEthernet3/0"
                 },
                 {
-                    "state": "down",
+                    "state": "up",
+                    "link": "13",
+                    "router": "R9",
                     "name": "GigabitEthernet2/0"
                 },
                 {
@@ -268,7 +280,9 @@
         },
         {
             "name": "R6",
+            "port": "5006",
             "id": "node6_id",
+            "type": "PE",
             "bgp_as": "110",
             "ospf_area_id": "1",
             "ospf_process_id": "4444",
@@ -288,7 +302,9 @@
                     "name": "GigabitEthernet1/0"
                 },
                 {
-                    "state": "down",
+                    "state": "up",
+                    "link": "14",
+                    "router": "R10",
                     "name": "GigabitEthernet2/0"
                 },
                 {
@@ -310,6 +326,8 @@
         {
             "name": "R7",
             "id": "node7_id",
+            "type": "PE",
+            "port": "5007",
             "bgp_as": "110",
             "ospf_area_id": "1",
             "ospf_process_id": "4444",
@@ -335,7 +353,9 @@
                     "name": "GigabitEthernet1/0"
                 },
                 {
-                    "state": "down",
+                    "state": "up",
+                    "link": "15",
+                    "router": "R11",
                     "name": "GigabitEthernet2/0"
                 },
                 {
@@ -348,6 +368,8 @@
         {
             "name": "R8",
             "id": "node8_id",
+            "port": "5008",
+            "type": "PE",
             "bgp_as": "110",
             "ospf_area_id": "1",
             "ospf_process_id": "4444",
@@ -380,11 +402,129 @@
                     "name": "FastEthernet0/0"
                 },
                 {
-                    "state": "down",
+                    "state": "up",
+                    "link": "16",
+                    "router": "R12",
                     "name": "GigabitEthernet2/0"
                 }
             ],
             "folder_name": "ecdf66e9-6527-47b5-80fd-c9dbc058e36c"
+        },
+        {
+            "name": "R9",
+            "id": "node9_id",
+            "port": "5009",
+            "type": "PE",
+            "ospf_area_id": "1",
+            "ospf_process_id": "4444",
+            "bgp_as": "111",
+            "interfaces": [
+                {
+                    "state": "up",
+                    "router": "R5",
+                    "link": "13",
+                    "name": "GigabitEthernet1/0"
+                },
+                {
+                    "state": "down",
+                    "name": "FastEthernet0/0"
+                },
+                {
+                    "state": "down",
+                    "name": "GigabitEthernet2/0"
+                }
+            ],
+            "folder_name": "5ea405d1-9545-4ee5-822f-811349198b57"
+        },
+        {
+            "name": "R10",
+            "id": "node10_id",
+            "port": "5010",
+            "type": "PE",
+            "ospf_area_id": "1",
+            "ospf_process_id": "4444",
+            "bgp_as": "112",
+            "interfaces": [
+                {
+                    "state": "up",
+                    "link": "14",
+                    "router": "R6",
+                    "name": "GigabitEthernet1/0"
+                },
+                {
+                    "state": "down",
+                    "name": "GigabitEthernet3/0"
+                },
+                {
+                    "state": "down",
+                    "name": "FastEthernet0/0"
+                },
+                {
+                    "state": "down",
+                    "name": "GigabitEthernet2/0"
+                }
+            ],
+            "folder_name": "a4068256-49e1-4baf-b546-3f4262901a42"
+        },
+        {
+            "name": "R11",
+            "id": "node11_id",
+            "port": "5011",
+            "type": "PE",
+            "ospf_area_id": "1",
+            "ospf_process_id": "4444",
+            "bgp_as": "113",
+            "interfaces": [
+                {
+                    "state": "up",
+                    "link": "15",
+                    "router": "R7",
+                    "name": "GigabitEthernet1/0"
+                },
+                {
+                    "state": "down",
+                    "name": "GigabitEthernet3/0"
+                },
+                {
+                    "state": "down",
+                    "name": "FastEthernet0/0"
+                },
+                {
+                    "state": "down",
+                    "name": "GigabitEthernet2/0"
+                }
+            ],
+            "folder_name": "81affc97-d1a2-4285-a6cc-a2c26099074c"
+        },
+        {
+            "name": "R12",
+            "port": "5012",
+            "id": "node12_id",
+            "type": "PE",
+            "ospf_area_id": "1",
+            "ospf_process_id": "4444",
+            "bgp_as": "114",
+            "interfaces": [
+                {
+                    "link": "16",
+                    "state": "up",
+                    "router": "R8",
+                    "name": "GigabitEthernet1/0"
+                },
+                {
+                    "state": "down",
+                    "name": "GigabitEthernet3/0"
+                },
+                {
+                    "state": "down",
+                    "name": "FastEthernet0/0"
+                },
+                {
+                    "state": "down",
+                    "name": "GigabitEthernet2/0"
+                }
+            ],
+            "folder_name": "b69cabf9-5473-4cd1-b053-b818d1c13098"
         }
     ],
     "links": [
@@ -459,6 +599,30 @@
             "router1": "R4",
             "router2": "R8",
             "num": "12"
+        },
+        {
+            "id": "link-id13",
+            "router1": "R5",
+            "router2": "R9",
+            "num": "13"
+        },
+        {
+            "id": "link-id14",
+            "router1": "R6",
+            "router2": "R10",
+            "num": "14"
+        },
+        {
+            "id": "link-id15",
+            "router1": "R7",
+            "router2": "R11",
+            "num": "15"
+        },
+        {
+            "id": "link-id16",
+            "router1": "R8",
+            "router2": "R12",
+            "num": "16"
         }
     ]
 }
