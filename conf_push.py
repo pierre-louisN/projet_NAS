@@ -1,6 +1,8 @@
 import json
 from os import path
 
+save_id = ""
+
 
 def conf_basic(fichier, router_conf):
     fichier.write("!Config du routeur"+str(router_conf['name'])+"\n")
@@ -69,12 +71,17 @@ def conf_inter_up(fichier, router_conf, data, interface):
         # Configuration différente selon même AS ou pas
         if (same_as == 0):
             fichier.write(" ip address 1.1.")
+            global save_id
+            save_id = "1.1."
             for link in data['links']:
                 if(link['num'] == interface['link']):
-                    fichier.write(str(link['num'])+".")
+                    fichier.write((link['num'])+".")
+                    save_id += link['num']+"."
                     if(link['router1'] == router_conf['name']):
+                        save_id += "1"
                         fichier.write("1 ")
                     if(link['router2'] == router_conf['name']):
+                        save_id += "2"
                         fichier.write("2 ")
                     mask = "255.255.255.252\n"
                     fichier.write(mask)
@@ -145,16 +152,20 @@ def conf_bgp(fichier, router_conf, data):
     fichier.write("router bgp "+router_conf["bgp_as"]+"\n")
     ind = router_conf["name"]
     loop_add = ind[1:]+"."+ind[1:]+"."+ind[1:]+"."+ind[1:]
-    fichier.write("bgp router-id " + loop_add + "\n")
+    if (router_conf["type"] != "PEc"):
+        fichier.write("bgp router-id " + loop_add + "\n")
+    else:
+        global save_id
+        fichier.write("bgp router-id " + save_id + "\n")
     fichier.write(" bgp log-neighbor-changes\n")
 
     for other_router in data["routers"]:
         if (router_conf["name"] != other_router["name"]) & (other_router["bgp_as"] == router_conf["bgp_as"]):
             ind = other_router["name"]
             addresses_others = ind[1:]+"."+ind[1:]+"."+ind[1:]+"."+ind[1:]
-            fichier.write("neighbor "+addresses_others +
+            fichier.write(" neighbor "+addresses_others +
                           " remote-as "+other_router["bgp_as"]+"\n")
-            fichier.write("neighbor "+addresses_others +
+            fichier.write(" neighbor "+addresses_others +
                           " update-source Loopback0\n")
         # Si c'est un routeur de bordure on doit ajouter les autres routeurs de bordure à notre config
         # if Routeur de bordure de l'AS associé à routeur de bordure d'une autre AS
@@ -170,11 +181,11 @@ def conf_bgp(fichier, router_conf, data):
                             if ((link['router1'] == router_conf["name"]) & (link['router2'] == other_router['name'])):
                                 address = "1.1."+link["num"]+".2"
                                 fichier.write(
-                                    "neighbor "+address+" remote-as "+other_router['bgp_as']+"\n")
+                                    " neighbor "+address+" remote-as "+other_router['bgp_as']+"\n")
                             elif ((link['router2'] == router_conf["name"]) & (link['router1'] == other_router['name'])):
                                 address = "1.1."+link["num"]+".1"
                                 fichier.write(
-                                    "neighbor "+address+" remote-as "+other_router['bgp_as']+"\n")
+                                    " neighbor "+address+" remote-as "+other_router['bgp_as']+"\n")
 
     fichier.write("!\n")
     # Ici pour les routeurs de bordures indiqué les chemins network mask + Loopbackk
