@@ -23,7 +23,7 @@ def conf_mpls(fichier, router_conf):
         # Integration de MPLS un peu tordu pour l'instant mais j'améliorerai après
         mpls = False
         if(str(interface['state']) == "up"):
-            print(interface['name'])
+
             if ("protocols" in interface):
                 for protocol in interface['protocols']:
                     if (protocol == "MPLS"):
@@ -47,28 +47,62 @@ def conf_inter_up(fichier, router_conf, data, interface):
     fichier.write("! Cet interface est up\n")
     fichier.write("interface "+str(interface['name'])+"\n")
     # Différencier Loopback des autres addresse ip
+    # Le routeur est-il connecté à un routeur de l'AS ou pas
+    same_as = 1
+    if ((interface["name"] != "Loopback0")):
+        for other_router in data["routers"]:
+            if (interface["router"] == other_router["name"]):
+                if (other_router["bgp_as"] != router_conf["bgp_as"]):
+                    same_as = 0
+
     if (interface['link'] == "0"):
         fichier.write(" ip addresse ")
         rout = router_conf['name']
         rout_num = rout[1:]
-        fichier.write(rout_num+"."+rout_num+"." +
-                      rout_num+"."+rout_num+"\n")
+        loop_addr = rout_num+"."+rout_num+"." + \
+            rout_num+"."+rout_num
+        mask = " 255.255.255.255\n"
+        fichier.write(loop_addr + mask)
+        network = loop_addr + " mask"+mask
+        networks.append(network)
     else:
-        fichier.write(" ip address 10.10.")
-        for link in data['links']:
-            if(link['num'] == interface['link']):
-                fichier.write(str(link['num'])+".")
-                if(link['router1'] == router_conf['name']):
-                    fichier.write("1 ")
-                if(link['router2'] == router_conf['name']):
-                    fichier.write("2 ")
-                fichier.write("255.255.255.0\n")
+        # Configuration différente selon même AS ou pas
+        if (same_as == 0):
+            fichier.write(" ip address 1.1.")
+            for link in data['links']:
+                if(link['num'] == interface['link']):
+                    fichier.write(str(link['num'])+".")
+                    if(link['router1'] == router_conf['name']):
+                        fichier.write("1 ")
+                    if(link['router2'] == router_conf['name']):
+                        fichier.write("2 ")
+                    mask = "255.255.255.252\n"
+                    fichier.write(mask)
+                    network = "1.1."+(link['num'])+".0 " + "mask " + mask
+                    networks.append(network)
+        else:
+            fichier.write(" ip address 10.10.")
+            for link in data['links']:
+                if(link['num'] == interface['link']):
+
+                    fichier.write((link['num'])+".")
+                    if(link['router1'] == router_conf['name']):
+                        fichier.write("1 ")
+                    if(link['router2'] == router_conf['name']):
+                        fichier.write("2 ")
+                    mask = "255.255.255.0\n"
+                    fichier.write(mask)
+                    network = "10.10."+(link['num'])+".0 " + "mask " + mask
+                    networks.append(network)
     if ("protocols" in interface):
         if("OSPF" in interface['protocols']):
             fichier.write(
                 " ip ospf " + router_conf["ospf_process_id"] + " area " + str(router_conf['ospf_area_id'])+"\n")
             if (interface['link'] != "0"):
-                fichier.write(" negotition auto\n")
+                if (interface['name'][1] == 'F'):
+                    fichier.write("duplex full\n")
+                else:
+                    fichier.write(" negotition auto\n")
 
 
 def conf_interfaces(fichier, router_conf, data):
@@ -107,37 +141,66 @@ def conf_end(fichier):
 
 
 def conf_bgp(fichier, router_conf, data):
+    # Configuration de bgp
     fichier.write("router bgp "+router_conf["bgp_as"]+"\n")
     ind = router_conf["name"]
-    addresse_loop = ind[1:]+"."+ind[1:]+"."+ind[1:]+"."+ind[1:]
-    fichier.write("bgp router-id " + addresse_loop + "\n")
+    loop_add = ind[1:]+"."+ind[1:]+"."+ind[1:]+"."+ind[1:]
+    fichier.write("bgp router-id " + loop_add + "\n")
     fichier.write(" bgp log-neighbor-changes\n")
 
     for other_router in data["routers"]:
-        if (router_conf["name"] != other_router["name"]) & ("bgp_as" in other_router):
+        if (router_conf["name"] != other_router["name"]) & (other_router["bgp_as"] == router_conf["bgp_as"]):
             ind = other_router["name"]
-            addresse_loop = ind[1:]+"."+ind[1:]+"."+ind[1:]+"."+ind[1:]
-            fichier.write("neighbor "+addresse_loop +
+            addresses_others = ind[1:]+"."+ind[1:]+"."+ind[1:]+"."+ind[1:]
+            fichier.write("neighbor "+addresses_others +
                           " remote-as "+other_router["bgp_as"]+"\n")
-            fichier.write("neighbor "+addresse_loop +
-                          "update-source Loopback0\n")
+            fichier.write("neighbor "+addresses_others +
+                          " update-source Loopback0\n")
+        # Si c'est un routeur de bordure on doit ajouter les autres routeurs de bordure à notre config
+        # if Routeur de bordure de l'AS associé à routeur de bordure d'une autre AS
+        twoPE_routers = (router_conf["type"] == "PE") & (other_router["type"] == "PEc") | (
+            (router_conf["type"] == "PEc") & (other_router["type"] == "PE"))
+        if (twoPE_routers):
+            for interface in router_conf["interfaces"]:
+
+                if (interface['name'] != "Loopback0") & (interface['state'] == 'up'):
+                    # Routers_connected
+                    if interface['router'] == other_router['name']:
+                        for link in data["links"]:
+                            if ((link['router1'] == router_conf["name"]) & (link['router2'] == other_router['name'])):
+                                address = "1.1."+link["num"]+".2"
+                                fichier.write(
+                                    "neighbor "+address+" remote-as "+other_router['bgp_as']+"\n")
+                            elif ((link['router2'] == router_conf["name"]) & (link['router1'] == other_router['name'])):
+                                address = "1.1."+link["num"]+".1"
+                                fichier.write(
+                                    "neighbor "+address+" remote-as "+other_router['bgp_as']+"\n")
+
+    fichier.write("!\n")
+    # Ici pour les routeurs de bordures indiqué les chemins network mask + Loopbackk
+    # Les activates sont useless
+    if (router_conf["type"] == "PE"):
+        fichier.write("address-family ipv4\n")
+        for network in networks:
+            fichier.write(" "+network)
+
+    fichier.write("exit-address-family\n")
 
 
 if __name__ == "__main__":
-    print('Début')
 
     with open('data_cop.json', 'r') as json_file:
         data = json.load(json_file)
-        # print(data['routers'])
     # there is a file to push for each router to configure
-
+    networks = []
     for router_conf in data['routers']:
         # Commentaire à enlever pour le vrai test
-        path = "project-files/dynamips/"
-        path += str(router_conf['id'])
-        #path += "/configs"
-        #path += "router "+str(router_conf['name'])+" configuration"
-        fichier = open(path+"_bis.cfg", 'w+')
+        path = "OSPF/project-files/dynamips/"
+        path += router_conf["folder_name"]+"/configs/i"
+        # path += "/configs"
+        # path += "router "+str(router_conf['name'])+" configuration"
+        path += router_conf["name"][1:]
+        fichier = open(path+"_startup-config.cfg", 'w+')
         conf_basic(fichier, router_conf)
         print("Routeur"+str(router_conf['name']))
         # Configure MPLS
@@ -155,6 +218,6 @@ if __name__ == "__main__":
         conf_end(fichier)
 
         fichier.close()
-
+        networks.clear()
         """"Problème d'itération quand on write sur le fichier
         le curseur va à la fin donc on ne peut pas ecrire dessus"""
