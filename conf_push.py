@@ -1,3 +1,4 @@
+from glob import glob
 import json
 from os import path
 
@@ -41,7 +42,7 @@ def conf_inter_down(fichier, router_conf, interface):
     fichier.write("interface "+str(interface['name'])+"\n")
     fichier.write(" no ip address\n")
     fichier.write(" shutdown\n")
-    fichier.write(" duplex full\n")
+    #fichier.write(" duplex full\n")
     fichier.write("! Fin config d interface \n")
 
 
@@ -58,14 +59,14 @@ def conf_inter_up(fichier, router_conf, data, interface):
                     same_as = 0
 
     if (interface['link'] == "0"):
-        fichier.write(" ip addresse ")
+        fichier.write(" ip address ")
         rout = router_conf['name']
         rout_num = rout[1:]
         loop_addr = rout_num+"."+rout_num+"." + \
             rout_num+"."+rout_num
         mask = " 255.255.255.255\n"
         fichier.write(loop_addr + mask)
-        network = loop_addr + " mask"+mask
+        network = "network "+loop_addr + " mask"+mask
         networks.append(network)
     else:
         # Configuration différente selon même AS ou pas
@@ -85,7 +86,8 @@ def conf_inter_up(fichier, router_conf, data, interface):
                         fichier.write("2 ")
                     mask = "255.255.255.252\n"
                     fichier.write(mask)
-                    network = "1.1."+(link['num'])+".0 " + "mask " + mask
+                    network = "network 1.1." + \
+                        (link['num'])+".0 " + "mask " + mask
                     networks.append(network)
         else:
             fichier.write(" ip address 10.10.")
@@ -99,17 +101,23 @@ def conf_inter_up(fichier, router_conf, data, interface):
                         fichier.write("2 ")
                     mask = "255.255.255.0\n"
                     fichier.write(mask)
-                    network = "10.10."+(link['num'])+".0 " + "mask " + mask
+                    network = "network 10.10." + \
+                        (link['num'])+".0 " + "mask " + mask
                     networks.append(network)
     if ("protocols" in interface):
         if("OSPF" in interface['protocols']):
+            global ospf
+            ospf = 1
             fichier.write(
                 " ip ospf " + router_conf["ospf_process_id"] + " area " + str(router_conf['ospf_area_id'])+"\n")
-            if (interface['link'] != "0"):
-                if (interface['name'][1] == 'F'):
-                    fichier.write("duplex full\n")
-                else:
-                    fichier.write(" negotition auto\n")
+    if (interface['link'] != "0"):
+        if (interface['name'][0] == 'F'):
+            fichier.write(" duplex full\n")
+        else:
+            fichier.write(" negotiation auto\n")
+        if ("protocols" in interface):
+            if("MPLS" in interface['protocols']):
+                fichier.write(" mpls ip\n")
 
 
 def conf_interfaces(fichier, router_conf, data):
@@ -167,6 +175,9 @@ def conf_bgp(fichier, router_conf, data):
                           " remote-as "+other_router["bgp_as"]+"\n")
             fichier.write(" neighbor "+addresses_others +
                           " update-source Loopback0\n")
+            if (router_conf["type"] == "PE"):
+                fichier.write(" neighbor "+addresses_others +
+                              " send-community\n")
         # Si c'est un routeur de bordure on doit ajouter les autres routeurs de bordure à notre config
         # if Routeur de bordure de l'AS associé à routeur de bordure d'une autre AS
         twoPE_routers = (router_conf["type"] == "PE") & (other_router["type"] == "PEc") | (
@@ -182,6 +193,9 @@ def conf_bgp(fichier, router_conf, data):
                                 address = "1.1."+link["num"]+".2"
                                 fichier.write(
                                     " neighbor "+address+" remote-as "+other_router['bgp_as']+"\n")
+                                community.append(address)
+                                community.append(
+                                    other_router['community_type'])
                             elif ((link['router2'] == router_conf["name"]) & (link['router1'] == other_router['name'])):
                                 address = "1.1."+link["num"]+".1"
                                 fichier.write(
@@ -190,20 +204,42 @@ def conf_bgp(fichier, router_conf, data):
     fichier.write("!\n")
     # Ici pour les routeurs de bordures indiqué les chemins network mask + Loopbackk
     # Les activates sont useless
-    if (router_conf["type"] == "PE"):
-        fichier.write("address-family ipv4\n")
-        for network in networks:
-            fichier.write(" "+network)
+    if (router_conf["type"] != "PEc"):
+        fichier.write(" address-family ipv4\n")
+        if (router_conf["type"] == "PE"):
+            for network in networks:
+                fichier.write("  "+network)
+            '''  
+            fichier.write("  neighbor "+community[0] + " route-map ")
+            fichier.write(community[1]+"_IN in\n")
+            fichier.write("  neighbor "+community[0] + " route-map ")
+            fichier.write(community[1]+"_IN out\n")
+            '''
+        if (router_conf["type"] == "P"):
+            fichier.write("  network "+loop_add + " mask 255.255.255.255\n")
+        if (router_conf["type"] == "PEc"):
+            fichier.write(
+                "  network "+community[0][:6] + "0 mask 255.255.255.252\n")
+        fichier.write(" exit-address-family\n")
 
-    fichier.write("exit-address-family\n")
+
+def conf_ospf(fichier, router_conf, data):
+    fichier.write("router ospf " + router_conf["ospf_process_id"]+"\n")
+    address_loop = router_conf["name"][1]+"."+router_conf["name"][1] + \
+        "."+router_conf["name"][1]+"."+router_conf["name"][1]
+    fichier.write(" router-id " + address_loop+"\n")
+    fichier.write(" network " + address_loop+" 0.0.0.0 area 0\n")
 
 
 if __name__ == "__main__":
+    global ospf
+    ospf = 0
 
     with open('data_cop.json', 'r') as json_file:
         data = json.load(json_file)
     # there is a file to push for each router to configure
     networks = []
+    community = []
     for router_conf in data['routers']:
         # Commentaire à enlever pour le vrai test
         path = "OSPF/project-files/dynamips/"
@@ -214,6 +250,7 @@ if __name__ == "__main__":
         fichier = open(path+"_startup-config.cfg", 'w+')
         conf_basic(fichier, router_conf)
         print("Routeur"+str(router_conf['name']))
+
         # Configure MPLS
         conf_mpls(fichier, router_conf)
         # Other basics confguration
@@ -224,10 +261,14 @@ if __name__ == "__main__":
         fichier.write("!\n")
 
         conf_interfaces(fichier, router_conf, data)
+        if ospf:
+            conf_ospf(fichier, router_conf, data)
+        ospf = 0
         if "bgp_as" in router_conf:
             conf_bgp(fichier, router_conf, data)
+        print(community)
         conf_end(fichier)
-
+        community.clear()
         fichier.close()
         networks.clear()
         """"Problème d'itération quand on write sur le fichier
