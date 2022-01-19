@@ -3,6 +3,7 @@ import getpass
 import telnetlib
 import os
 import time 
+import sys
 #from jsondiff import diff
 
 def get_routerID(router_num) :
@@ -80,23 +81,28 @@ def config_MPLS(tn,interface_name):
     tn.write(b"end \r")
 
 #retourne le nom de tous les voisins (ceux qui ont le même numéro d'AS et les PEc qui sont reliés)
-"""             if(router_type=="PE"):
-                for link in data["links"] :
-                    if(link["router1"]==router_name and router["name"]==link["router2"] and router["type"]=="PEc") :
-                        subnet_num = str(get_subnet_num(link['num'],router["name"],data))
-                        tab.append([(b'10.10.'+link['num'].encode('ascii')+b'.'+subnet_num.encode('ascii')),router["bgp_as"],router["type"]])
 
-            if(router_type=="PEc"):
-                for link in data["links"] :
-                    if(link["router2"]==router_name and router["name"]==link["router1"] and router["type"]=="PE") :
-                        subnet_num = str(get_subnet_num(link['num'],router["name"],data))
-                        tab.append([(b'10.10.'+link['num'].encode('ascii')+b'.'+subnet_num.encode('ascii')),router["bgp_as"],router["type"]]) """
-                        
+
 def get_neighbors(as_number,router_name,router_type, data):
     tab = []
     for router in data["routers"]:
-        if(router["bgp_as"]==as_number):
-            tab.append([get_routerID(router['name'][1:]),as_number,router["type"]])     
+        if(router['name']!=router_name and router["bgp_as"]==as_number):
+            tab.append([get_routerID(router['name'][1:]),as_number,router["type"]])  
+        
+        if(router_type=="PE"):
+            for link in data["links"] :
+                if(link["router1"]==router_name and router["name"]==link["router2"] and router["type"]=="PEc") :
+                    subnet_num = str(get_subnet_num(link['num'],router["name"],data))
+                    #tab.append([(b'10.10.'+link['num'].encode('ascii')+b'.'+subnet_num.encode('ascii')),router["bgp_as"],router["type"]]) 
+                    tab.append([get_routerID(router['name'][1:]),router["bgp_as"],router["type"]])
+
+        if(router_type=="PEc"):
+            for link in data["links"] :
+                if(link["router2"]==router_name and router["name"]==link["router1"] and router["type"]=="PE") :
+                    subnet_num = str(get_subnet_num(link['num'],router["name"],data))
+                    tab.append([get_routerID(router['name'][1:]),router["bgp_as"],router["type"]])
+                    #tab.append([(b'10.10.'+link['num'].encode('ascii')+b'.'+subnet_num.encode('ascii')),router["bgp_as"],router["type"]]) 
+
     return tab
 
 
@@ -120,15 +126,15 @@ def config_BGP(tn,as_number,router_name,data,router_type,subnets):
     time.sleep(1)
     tn.write(b' \r ')
 
-def config_telnet():
+def config_telnet(user,project,filename):
 #   os.system("rm /home/strack/GNS3/projects/test/project-files/dynamips/c408e2c4-a1c6-4fcd-9c09-2a86e9afc405/configs/i2_startup-config.cfg")
     os.system('python3 insert_folder.py')
     time.sleep(1)
-    username = "plnohet"
-    project_name =  "OSPF"
+    username = user
+    project_name =  project
     HOST = "127.0.0.1"
 
-    with open('data_cop.json') as json_file:
+    with open(filename) as json_file:
         data = json.load(json_file)
 
         subnets = {}
@@ -288,6 +294,22 @@ def search_name( json1,group,name):
 
 if __name__ == "__main__":
     print("Début main configuration Telnet")
-    config_telnet()
+
+
+    print ('Number of arguments:', len(sys.argv), 'arguments.')
+    if len(sys.argv) >= 4 :
+        username = sys.argv[1]
+        project_name =  sys.argv[2]
+        filename = sys.argv[3] 
+        mode = sys.argv[4]
+    else : #argument par défaut 
+        username = "plnohet"
+        project_name =  "OSPF"
+        filename = 'data_cop.json'
+        mode = 0
+    if(mode == 0 ):
+        config_telnet(username,project_name,filename)
+    else :
+        maj()
     print("Fin main configuration Telnet")
 
