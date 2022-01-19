@@ -4,12 +4,15 @@ import os
 import sys
 
 if __name__ == "__main__":
-    print('Début')
+    print('Début main insertion des dossier')
 
     with open('data_cop.json', 'r') as json_file:
         data = json.load(json_file)
 
-    path = "OSPF/project-files/dynamips/"
+    username = "plnohet"
+    project_name =  "OSPF"
+    path = "/home/"+username+"/GNS3/projects/"+project_name+"/project-files/dynamips/"
+
     foldlist = os.listdir(path)
     with open('data_cop.json', 'r') as file:
         data_bis = json.load(file)
@@ -29,6 +32,7 @@ if __name__ == "__main__":
                     router_conf.update(newdic)
 
         except NotADirectoryError:
-            print()
+            continue
     with open('data_cop.json', 'w') as file:
         json.dump(data_bis, file)
+    print("Fin main insertion des dossier")
