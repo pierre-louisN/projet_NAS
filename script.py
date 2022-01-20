@@ -37,7 +37,7 @@ def config_interface(tn,interface_name,link_num,router_name,data, subnets):
         (subnets[router_name]).append([b'10.10.'+link_num.encode('ascii')+b'.0',b"255.255.255.0"])
     tn.write(b'no shutdown \r')
     tn.write(b'end \r')
-    time.sleep(1)
+    time.sleep(0.1)
     tn.write(b' \r ')
 
 
@@ -49,7 +49,7 @@ def router_activate_OSPF(tn,router_name,router_type,process_id):
     tn.write((b'router-id ')+router_id+b' \r')
     if(router_type!="PEc"):
         tn.write(b'network '+router_id+b' 0.0.0.0 area 0\r')
-    time.sleep(1)
+    time.sleep(0.1)
     tn.write(b"end \r")
 
 def router_activate_MPLS(tn,router_name):
@@ -57,7 +57,7 @@ def router_activate_MPLS(tn,router_name):
     tn.write(b"mpls ip \r")
     tn.write(b"mpls label protocol ldp \r")
     tn.write(b'end \r')
-    time.sleep(1)
+    time.sleep(0.1)
     print("MPLS activated on router :",router_name)
 
 #active OSPF sur l'interface
@@ -66,7 +66,7 @@ def config_OSPF(tn,interface_name,process_id,area_id):
     tn.write(b'interface '+interface_name.encode('ascii')+b' \r')
     tn.write((b'ip ospf ')+process_id.encode('ascii')+(b' area ')+area_id.encode('ascii')+b' \r')
     tn.write(b' \r ')
-    time.sleep(1)
+    time.sleep(0.1)
     #tn.write(b'enable cisco \r')
     tn.write(b'end \r')
     #tn.write(b'cisco\r')
@@ -76,7 +76,7 @@ def config_MPLS(tn,interface_name):
     tn.write(b"interface "+interface_name.encode('ascii')+b' \r')
     tn.write(b"mpls ip \r")
     tn.write(b"exit \r")
-    time.sleep(1)
+    time.sleep(0.1)
     tn.write(b' \r ')
     tn.write(b"end \r")
 
@@ -88,11 +88,12 @@ def get_neighbors(as_number,router_name,router_type, data):
     for router in data["routers"]:
         if(router['name']!=router_name and router["bgp_as"]==as_number):
             tab.append([get_routerID(router['name'][1:]),as_number,router["type"]])  
-        
+        #print(router)
         if(router_type=="PE"):
             for link in data["links"] :
                 if(link["router1"]==router_name and router["name"]==link["router2"] and router["type"]=="PEc") :
                     subnet_num = str(get_subnet_num(link['num'],router["name"],data))
+                    print("type :"+router["type_as"])
                     tab.append([(b'10.10.'+link['num'].encode('ascii')+b'.'+subnet_num.encode('ascii')),router["bgp_as"],router["type_as"],link["num"]]) 
                     #tab.append([get_routerID(router['name'][1:]),router["bgp_as"],router["type"],link["num"]])
 
@@ -100,28 +101,41 @@ def get_neighbors(as_number,router_name,router_type, data):
             for link in data["links"] :
                 if(link["router2"]==router_name and router["name"]==link["router1"] and router["type"]=="PE") :
                     subnet_num = str(get_subnet_num(link['num'],router["name"],data))
+                    print("type :"+router["type_as"])
                     #tab.append([get_routerID(router['name'][1:]),router["bgp_as"],router["type"],link["num"]])
                     tab.append([(b'10.10.'+link['num'].encode('ascii')+b'.'+subnet_num.encode('ascii')),router["bgp_as"],router["type_as"],link["num"]]) 
 
     return tab
 
+def get_clients(data): 
+    tab = []
+    for router in data["routers"]:
+        if(router["type_as"]=="Client" and router["bpg_as"]!="110") :
+            tab.append(router["bpg_as"])
+    return tab
 
-def config_BGP(tn,as_number,router_name,data,router_type,subnets):
+def config_BGP(tn,as_number,router_name,data,router_type,subnets,type_as):
     tn.write(b"conf t \r")    
     tn.write(b"router bgp "+as_number.encode('ascii')+b" \r")
     tn.write(b"no sync \r")
     tn.write(b"bgp router-id "+get_routerID(router_name[1:])+b" \r")
-    time.sleep(5)
+    time.sleep(0.1)
     neighbors = get_neighbors(as_number,router_name,router_type,data) #récupére les voisins 
     print(neighbors)
     for neighbor in neighbors:
         tn.write(b"neighbor "+neighbor[0]+b" remote-as "+neighbor[1].encode('ascii')+b" \r")
-        if not((router_type=="PE" and neighbor[2]=="PEc") or (router_type=="PEc" and neighbor[2]=="PE")) : # si ce n'est pas un lien entre PE et CE
+        time.sleep(0.1)
+        print(neighbor)
+        if (neighbor[1]=="110" and as_number=="110"):
             tn.write(b"neighbor "+neighbor[0]+b" update-source Loopback0 \r")
-        print(as_number)
-        print(router_type)
-        print(neighbor[1])
+            tn.write(b"neighbor "+neighbor[0]+b" send-community \r")
+        
+
         if(neighbor[1]!=as_number and router_type=="PE" and as_number=="110"):
+            
+            #clients = ["111","112"]
+            clients = get_clients(data)
+            print(clients)
             if(neighbor[2]=="Provider"):
                 tn.write(b'neighbor 10.10.'+(neighbor[3].encode('ascii'))+b'.2 route-map PROVIDER_IN in \r')
                 tn.write(b'neighbor 10.10.'+(neighbor[3].encode('ascii'))+b'.2 route-map PROVIDER_OUT out \r')
@@ -136,13 +150,18 @@ def config_BGP(tn,as_number,router_name,data,router_type,subnets):
                 tn.write(b'match community 1 \r')
                 tn.write(b'set local-preference 50 \r')
                 tn.write(b'set community '+neighbor[1].encode('ascii')+b':5 \r')
-
+                tn.write(b'end \r')
+                tn.write(b'conf t \r')
+                for client in clients: 
+                    tn.write(b'ip community-list 10 permit '+client.encode('ascii')+b':150 \r')
+                
+                tn.write(b'access-list 1 permit any \r')
             elif(neighbor[2]=="Peer") :
                 tn.write(b'neighbor 10.10.'+(neighbor[3].encode('ascii'))+b'.2 route-map PEER_IN in \r')
                 tn.write(b'neighbor 10.10.'+(neighbor[3].encode('ascii'))+b'.2 route-map PEER_OUT out \r')
                 tn.write(b'end \r')
                 tn.write(b'conf t \r')
-                tn.write(b'route-map PROVIDER_OUT permit 10 \r')
+                tn.write(b'route-map PEER_OUT permit 10 \r')
                 tn.write(b'match community 10 \r')
                 tn.write(b'continue \r')
                 tn.write(b'end \r')
@@ -151,7 +170,11 @@ def config_BGP(tn,as_number,router_name,data,router_type,subnets):
                 tn.write(b'match community 1 \r')
                 tn.write(b'set local-preference 100 \r')
                 tn.write(b'set community '+neighbor[1].encode('ascii')+b':100 \r')
-            
+                tn.write(b'end \r')
+                tn.write(b'conf t \r')
+                for client in clients: 
+                    tn.write(b'ip community-list 10 permit '+client.encode('ascii')+b':150 \r')
+
             elif(neighbor[2]=="Client") :
                 tn.write(b'neighbor 10.10.'+(neighbor[3].encode('ascii'))+b'.2 route-map CLIENT in \r')
                 tn.write(b'end \r')
@@ -160,14 +183,19 @@ def config_BGP(tn,as_number,router_name,data,router_type,subnets):
                 tn.write(b'match community 1 \r')
                 tn.write(b'set local-preference 150 \r')
                 tn.write(b'set community '+neighbor[1].encode('ascii')+b':150 \r')
-        
+            time.sleep(0.1)
+            tn.write(b'end \r')
+            tn.write(b'conf t \r')
+            tn.write(b'ip community-list 1 permit internet \r')
+        time.sleep(0.1)
         tn.write(b'end \r')
-        time.sleep(1)
+        time.sleep(0.1)
         tn.write(b'conf t \r')
         tn.write(b"router bgp "+as_number.encode('ascii')+b" \r")
+        
     
     tn.write(b'end \r')
-    time.sleep(1)
+    time.sleep(0.1)
     tn.write(b'conf t \r')
     tn.write(b"router bgp "+as_number.encode('ascii')+b" \r")
     if(router_type!="P"): # si le routeur courant est n'est pas un provider
@@ -175,13 +203,11 @@ def config_BGP(tn,as_number,router_name,data,router_type,subnets):
             print(subnets_routers)
             tn.write(b'network '+subnets_routers[0]+ b' mask '+subnets_routers[1]+b' \r')
     tn.write(b"end\r")
-    time.sleep(1)
+    time.sleep(0.1)
     tn.write(b' \r ')
 
-def config_telnet(user,project,filename):
-    time.sleep(1)
-    username = user
-    project_name =  project
+def config_telnet(filename):
+    #time.sleep(0.1)
     HOST = "127.0.0.1"
 
     with open(filename) as json_file:
@@ -194,15 +220,15 @@ def config_telnet(user,project,filename):
             port = router_conf['port']
             print("Router "+router_conf['name']+" port n° : " + str(port))
             subnets[router_conf['name']] = []
-            try : 
+            try :     
                 with telnetlib.Telnet(HOST, port) as tn :
                     # 0 : enlève les write du terminal, 1 : met les print dans le terminal 
                     tn.set_debuglevel(1)
                     #if(router_conf['folder_name']) :
                     #os.system("rm /home/"+username+"/GNS3/projects/"+project_name+"/project-files/dynamips/"+router_conf['folder_name']+"/configs/i"+router_conf['name'][1:]+"_startup-config.cfg")
-                    #time.sleep(5)
-                    #if(router_conf['name']!="R9"):
-                    #    continue
+                    #time.sleep(0.1)
+                    if(router_conf['name']!="R7"):
+                        continue
                         #pour sauter les lignes d'initialisation du terminal
                     for i in range (1,5):
                         tn.write(b'\r')        
@@ -212,7 +238,7 @@ def config_telnet(user,project,filename):
                             config_interface(tn,interface['name'],interface['link'],router_conf['name'],data,subnets)
                     
                     if(router_conf["type"]!="PEc"): 
-                        try : 
+                        try :
                             if(router_conf['ospf_area_id']) :
                                 print("OSPF activated on router :",router_conf['name'])
                                 router_activate_OSPF(tn,router_conf['name'],router_conf['type'],router_conf['ospf_process_id'])
@@ -247,7 +273,7 @@ def config_telnet(user,project,filename):
                                                 print('Generation of BGP config on router : '+ router_conf['name'] + ' for interface '+ interface['name']+'\n')
                                                 # pour l'instant on le met en sur 
                                                 as_number = router_conf["bgp_as"] # pour l'instant, on le met en dur mais après il faudra le rajouter dans le json pour chaque routeur 
-                                                config_BGP(tn,as_number,router_conf['name'],data,router_conf["type"],subnets)
+                                                config_BGP(tn,as_number,router_conf['name'],data,router_conf["type"],subnets,router_conf["type_as"])
                                         except KeyError :
                                             print("BGP not implented")
                                 else :
@@ -257,7 +283,7 @@ def config_telnet(user,project,filename):
                                             print('Generation of BGP config on router : '+ router_conf['name'] + ' for interface '+ interface['name']+'\n')
                                             # pour l'instant on le met en sur 
                                             as_number = router_conf["bgp_as"] # pour l'instant, on le met en dur mais après il faudra le rajouter dans le json pour chaque routeur 
-                                            config_BGP(tn,as_number,router_conf['name'],data,router_conf["type"],subnets)
+                                            config_BGP(tn,as_number,router_conf['name'],data,router_conf["type"],subnets,router_conf["type_as"])
                                     except KeyError :
                                         print("BGP not implented") 
 
@@ -266,7 +292,7 @@ def config_telnet(user,project,filename):
                     #else :
                     #    return 0
                     tn.write(b'write \r') 
-                    time.sleep(1)
+                    time.sleep(0.1)
                     tn.write(b'\r') 
             #si on arrive pas à se connecter au routeur 
             except ConnectionRefusedError:
@@ -279,7 +305,7 @@ def deconfig_OSPF(tn, interface_name,process_id,area_id):
     tn.write(b'interface '+interface_name.encode('ascii')+b' \r')
     tn.write((b'no ip ospf ')+process_id.encode('ascii')+(b' area ')+area_id.encode('ascii')+b' \r')
     tn.write(b' \r ')
-    time.sleep(1)
+    time.sleep(0.1)
     tn.write(b'end \r')
 
 def deconfig_MPLS(tn, interface_name):
@@ -290,6 +316,8 @@ def deconfig_MPLS(tn, interface_name):
 def deconfig_BGP(tn,as_number,router_name):
     tn.write(b"conf t \r")
     tn.write(b"no router bgp "+as_number+"\r")
+
+
 
 def get_ancien_json(name):
     with open(name) as json_file:
@@ -311,11 +339,58 @@ def router_shutdown(tn,router):
 
 
 def interface_shutdown(tn,name):
+    print(name)
+    tn.set_debuglevel(1)
     tn.write(b" conf t\r")
     tn.write(b" int "+name.encode('ascii')+b" \r")
     tn.write(b"shut  \r")
     tn.write(b"end \r")
     
+def config_interface_protocol(tn,interface, router_conf,data, subnets):
+    MPLS_activated=False
+    if(interface['state'] == "up"):
+        try :
+            if(router_conf["type"]!="PEc") :
+                
+                for protocol in interface['protocols']:  
+
+                    try :     
+                        if(router_conf['ospf_area_id']):
+                                print('Generation of OSPF config on router : '+ router_conf['name'] + ' for interface '+ interface['name']+'\n')
+                                config_OSPF(tn,interface['name'],router_conf['ospf_process_id'],router_conf['ospf_area_id'])
+                    except KeyError :
+                        print("OSPF not implented")
+                    
+                    if (protocol == "MPLS"):
+                        if(MPLS_activated==False):  #commande pour activer MPLS sur le routeur, on le fait que une seule fois
+                            router_activate_MPLS(tn,router_conf['name'])
+                            MPLS_activated = True
+                        
+                        print('Generation of MPLS config on router : '+ router_conf['name'] + ' for interface '+ interface['name']+'\n')
+                        config_MPLS(tn,interface['name'])
+                    
+                    try :
+                        if (router_conf["bgp_as"]): 
+                            print('Generation of BGP config on router : '+ router_conf['name'] + ' for interface '+ interface['name']+'\n')
+                            # pour l'instant on le met en sur 
+                            as_number = router_conf["bgp_as"] # pour l'instant, on le met en dur mais après il faudra le rajouter dans le json pour chaque routeur 
+                            config_BGP(tn,as_number,router_conf['name'],data,router_conf["type"],subnets,router_conf["type_as"])
+                    except KeyError :
+                        print("BGP not implented")
+            else :
+                print("AS BGP :"+router_conf["bgp_as"])
+                try :
+                    if(router_conf["bgp_as"]):
+                        print('Generation of BGP config on router : '+ router_conf['name'] + ' for interface '+ interface['name']+'\n')
+                        # pour l'instant on le met en sur 
+                        as_number = router_conf["bgp_as"] # pour l'instant, on le met en dur mais après il faudra le rajouter dans le json pour chaque routeur 
+                        config_BGP(tn,as_number,router_conf['name'],data,router_conf["type"],subnets,router_conf["type_as"])
+                except KeyError :
+                    print("BGP not implented") 
+
+        except KeyError :
+            pass
+
 
 #search name in json1 group 
 def search_name( json1,group,name):
@@ -327,62 +402,12 @@ def search_protocol (json1,name):
 
 def maj():
     #os.system('python3 insert_folder.py')
-    time.sleep(1)
+    time.sleep(0.1)
     username = "sstrack"
     project_name =  "OSPF"
     HOST = "127.0.0.1"
-
-
-    with open('newdata_test.json') as json_file:
-        data = json.load(json_file)
     
-        ancien_data=get_ancien_json('olddata_test.json')
-        subnets= {}
-        for router_conf in data['routers']:
-            port = router_conf['port']
-            #print("Router "+router_conf['name']+" port n° : " + str(port))
-            subnets[router_conf['name']] = []
-                
-            try:   
-                #with telnetlib.Telnet(HOST, port) as tn:
-                    #search if a router from the new json is in the old json 
-                    
-                   # os.system("rm /home/"+username+"/GNS3/projects/"+project_name+"/project-files/dynamips/"+router_conf['folder_name']+"/configs/i"+router_conf['name'][1:]+"_startup-config.cfg")
-                    #os.system("rm /home/strack/Documents/NAS/"+project_name+"/project-files/dynamips/"+router_conf['folder_name']+"/configs/i"+router_conf['name'][1:]+"_startup-config.cfg")
-                    #time.sleep(5)
-                    
-                    
-                    samerouter= search_name(ancien_data['routers'],'name',router_conf['name'])
-                    #if we don't find it in the old json, we create it 
-                    if not(samerouter):
-                        print("we create "+router_conf['name']+" in the new json \n")
-                        #create_router(tn,router_conf)
-                        
-                    else:
-                        '''with telnetlib.Telnet(HOST, port) as tn:
-                            tn.set_debuglevel(1)
-
-                            for i in range (1,5):
-                                    tn.write(b'\r')  '''
-                        samerouter = samerouter[0]
-                        #print(json.dumps(samerouter, indent=4, sort_keys=True))    
-                        #print(json.dumps(samerouter['interfaces'][0], indent=4, sort_keys=True)) 
-                        print("fini")
-                        for interface in router_conf['interfaces']:
-                            #print(samerouter['interfaces'][0])
-                            samelink = search_name(samerouter['interfaces'],'link',interface['link'])
-                            #linkinnew = search_name(router_conf['interfaces'],'link', samerouter['interfaces'])
-                            if not(samelink):
-                                
-                                #config new link with the new protocols 
-                                print("link  "+interface['link']+" created in the new file \n")
-                                #config_interface(tn,interface['name'],interface['link'],router_conf['name'],data,subnets)
-                            #print("samelink"+json.dumps(samelink, indent=4, sort_keys=True))
-                            #print("porotocol : " +json.dumps(interface['protocols'], indent=4, sort_keys=True))
-            except ConnectionRefusedError:
-                continue  
-
-    with open('olddata_test.json') as json_file:
+    with open('olddata_test2.json') as json_file:
         data = json.load(json_file)
 
         ancien_data=get_ancien_json('newdata_test.json')
@@ -401,10 +426,10 @@ def maj():
                     #time.sleep(5)
                     
                     
-                    samerouter= search_name(ancien_data['routers'],'name',router_conf['name'])
+                    samerouter= search_name(ancien_data['routers'],'id',router_conf['id'])
                     #if we don't find it in the old json, we create it 
                     if not(samerouter):
-                        print("we delete "+router_conf['name']+" in the new json \n")
+                        print("we delete id:"+router_conf['id']+" in the new json \n")
                         router_shutdown(tn,router_conf)
                         
                     else:
@@ -425,81 +450,164 @@ def maj():
                                 
                                 #config new link with the new protocols 
                                 print("link  "+interface['link']+" deleted in the new file \n")
-                                interface_shutdown(tn,interface['link'])
+                                interface_shutdown(tn,interface['name'])
                                 #config_interface(tn,interface['name'],interface['link'],router_conf['name'],data,subnets)
                             #print("samelink"+json.dumps(samelink, indent=4, sort_keys=True))
                             #print("porotocol : " +json.dumps(interface['protocols'], indent=4, sort_keys=True))
             except ConnectionRefusedError:
                 continue  
+
+
+    with open('newdata_test.json') as json_file:
+        data = json.load(json_file)
+    
+        ancien_data=get_ancien_json('olddata_test2.json')
+        subnets= {}
+        for router_conf in data['routers']:
+            port = router_conf['port']
+            #print("Router "+router_conf['name']+" port n° : " + str(port))
+            subnets[router_conf['id']] = []
+                
+            try:   
+                with telnetlib.Telnet(HOST, port) as tn:
+                    #search if a router from the new json is in the old json 
+                    
+                   # os.system("rm /home/"+username+"/GNS3/projects/"+project_name+"/project-files/dynamips/"+router_conf['folder_name']+"/configs/i"+router_conf['name'][1:]+"_startup-config.cfg")
+                    #os.system("rm /home/strack/Documents/NAS/"+project_name+"/project-files/dynamips/"+router_conf['folder_name']+"/configs/i"+router_conf['name'][1:]+"_startup-config.cfg")
+                    #time.sleep(5)
+                    
+                    
+                    samerouter= search_name(ancien_data['routers'],'id',router_conf['id'])
+                    #if we don't find it in the old json, we create it 
+                    if not(samerouter):
+                        print("we create id:"+router_conf['id']+" in the new json \n")
+                        create_router(tn,router_conf,data,subnets,HOST)
+                        
+                    else:
+                        '''with telnetlib.Telnet(HOST, port) as tn:
+                            tn.set_debuglevel(1)
+
+                            for i in range (1,5):
+                                    tn.write(b'\r')  '''
+                        samerouter = samerouter[0]
+                        #print(json.dumps(samerouter, indent=4, sort_keys=True))    
+                        #print(json.dumps(samerouter['interfaces'][0], indent=4, sort_keys=True)) 
+                        print("fini")
+                        for interface in router_conf['interfaces']:
+                            #print(samerouter['interfaces'][0])
+                            samelink = search_name(samerouter['interfaces'],'link',interface['link'])
+                            #linkinnew = search_name(router_conf['interfaces'],'link', samerouter['interfaces'])
+                            if not(samelink):
+                                
+                                #config new link with the new protocols 
+                                print("link  "+interface['link']+" created in the new file \n")
+                                config_interface(tn,interface['name'],interface['link'],router_conf['name'],data,subnets)
+                                config_interface_protocol(tn,interface, router_conf,data,subnets)
+                            #print("samelink"+json.dumps(samelink, indent=4, sort_keys=True))
+                            #print("porotocol : " +json.dumps(interface['protocols'], indent=4, sort_keys=True))
+            except ConnectionRefusedError:
+                continue  
+
+
                 
        
                             
-def create_router(tn,router_conf,data,subnets):
-    try : 
-                  
-    
-        # 0 : enlève les write du terminal, 1 : met les print dans le terminal 
-        tn.set_debuglevel(0)
-        #if(router_conf['folder_name']) :
+def create_router(tn,router_conf,data,subnets,HOST):
+    #on part du principe que les routeurs sont crée les uns après les autres et dans l'ordre
+    #port = 5000 + (int)(router_conf['name'][1:]) - 1 
+    port = router_conf['port']
+    print("Router "+router_conf['name']+" port n° : " + str(port))
+    subnets[router_conf['name']] = []
+    try :     
+        with telnetlib.Telnet(HOST, port) as tn :
+            # 0 : enlève les write du terminal, 1 : met les print dans le terminal 
+            tn.set_debuglevel(1)
+            #if(router_conf['folder_name']) :
             #os.system("rm /home/"+username+"/GNS3/projects/"+project_name+"/project-files/dynamips/"+router_conf['folder_name']+"/configs/i"+router_conf['name'][1:]+"_startup-config.cfg")
-            #time.sleep(5)
+            #time.sleep(0.1)
+            if(router_conf['name']!="R7"):
+                pass
+                #pour sauter les lignes d'initialisation du terminal
+            for i in range (1,5):
+                tn.write(b'\r')        
 
-            #pour sauter les lignes d'initialisation du terminal
-        for i in range (1,5):
-            tn.write(b'\r')        
+            for interface in router_conf['interfaces']:
+                if(interface['state'] == "up"):
+                    config_interface(tn,interface['name'],interface['link'],router_conf['name'],data,subnets)
+            
+            if(router_conf["type"]!="PEc"): 
+                try :
+                    if(router_conf['ospf_area_id']) :
+                        print("OSPF activated on router :",router_conf['name'])
+                        router_activate_OSPF(tn,router_conf['name'],router_conf['type'],router_conf['ospf_process_id'])
+                except KeyError :
+                    pass 
+            
+            MPLS_activated = False
+            for interface in router_conf['interfaces']:
+                if(interface['state'] == "up"):
+                    try :
+                        if(router_conf["type"]!="PEc") :
+                            
+                            for protocol in interface['protocols']:  
 
-        for interface in router_conf['interfaces']:
-            if(interface['state'] == "up"):
-                config_interface(tn,interface['name'],interface['link'],router_conf['name'],data,subnets)
+                                try :     
+                                    if(router_conf['ospf_area_id']):
+                                            print('Generation of OSPF config on router : '+ router_conf['name'] + ' for interface '+ interface['name']+'\n')
+                                            config_OSPF(tn,interface['name'],router_conf['ospf_process_id'],router_conf['ospf_area_id'])
+                                except KeyError :
+                                    print("OSPF not implented")
+                                
+                                if (protocol == "MPLS"):
+                                    if(MPLS_activated==False):  #commande pour activer MPLS sur le routeur, on le fait que une seule fois
+                                        router_activate_MPLS(tn,router_conf['name'])
+                                        MPLS_activated = True
+                                    
+                                    print('Generation of MPLS config on router : '+ router_conf['name'] + ' for interface '+ interface['name']+'\n')
+                                    config_MPLS(tn,interface['name'])
+                                
+                                try :
+                                    if (router_conf["bgp_as"]): 
+                                        print('Generation of BGP config on router : '+ router_conf['name'] + ' for interface '+ interface['name']+'\n')
+                                        # pour l'instant on le met en sur 
+                                        as_number = router_conf["bgp_as"] # pour l'instant, on le met en dur mais après il faudra le rajouter dans le json pour chaque routeur 
+                                        config_BGP(tn,as_number,router_conf['name'],data,router_conf["type"],subnets,router_conf["type_as"])
+                                except KeyError :
+                                    print("BGP not implented")
+                        else :
+                            print("AS BGP :"+router_conf["bgp_as"])
+                            try :
+                                if(router_conf["bgp_as"]):
+                                    print('Generation of BGP config on router : '+ router_conf['name'] + ' for interface '+ interface['name']+'\n')
+                                    # pour l'instant on le met en sur 
+                                    as_number = router_conf["bgp_as"] # pour l'instant, on le met en dur mais après il faudra le rajouter dans le json pour chaque routeur 
+                                    config_BGP(tn,as_number,router_conf['name'],data,router_conf["type"],subnets,router_conf["type_as"])
+                            except KeyError :
+                                print("BGP not implented") 
 
-        if(router_conf['ospf_area_id']) :
-            print("OSPF activated on router :",router_conf['name'])
-            router_activate_OSPF(tn,router_conf['name'][1:],router_conf['ospf_process_id'])
-
-        MPLS_activated = False
-        for interface in router_conf['interfaces']:
-            if(interface['state'] == "up"):
-                for protocol in interface['protocols']:      
-                    if(protocol == "OSPF") :
-                            print('Generation of OSPF config on router : '+ router_conf['name'] + ' for interface '+ interface['name']+'\n')
-                            config_OSPF(tn,interface['name'],router_conf['ospf_process_id'],router_conf['ospf_area_id'])
-
-                    if (protocol == "MPLS"):
-                        if(MPLS_activated==False):  #commande pour activer MPLS sur le routeur, on le fait que une seule fois
-                            router_activate_MPLS(tn,router_conf['name'])
-                            MPLS_activated = True
-                        
-                        print('Generation of MPLS config on router : '+ router_conf['name'] + ' for interface '+ interface['name']+'\n')
-                        config_MPLS(tn,interface['name'])
-                    
-                    if (router_conf["bgp_as"]): # pas encore fini
-                        print('Generation of BGP config on router : '+ router_conf['name'] + ' for interface '+ interface['name']+'\n')
-                        # pour l'instant on le met en sur 
-                        as_number = router_conf["bgp_as"] # pour l'instant, on le met en dur mais après il faudra le rajouter dans le json pour chaque routeur 
-                        config_BGP(tn,as_number,router_conf['name'],data)
-                    #else :
-                    #    return 0
-            #si on arrive pas à se connecter au routeur 
+                    except KeyError :
+                        continue
+            #else :
+            #    return 0
+            tn.write(b'write \r') 
+            time.sleep(0.1)
+            tn.write(b'\r') 
+    #si on arrive pas à se connecter au routeur 
     except ConnectionRefusedError:
         pass
-
 
 
 if __name__ == "__main__":
     print("Début main configuration Telnet")
 
-    if len(sys.argv) >= 4 :
-        username = sys.argv[1]
-        project_name =  sys.argv[2]
-        filename = sys.argv[3] 
-        mode = sys.argv[4]
+    if len(sys.argv) >= 3 :
+        filename = sys.argv[1] 
+        mode = sys.argv[2]
     else : #argument par défaut 
-        username = "sstrack"
-        project_name =  "Basic"
-        filename = 'olddata_test.json'
+        filename = 'olddata_test2.json'
         mode = 0
     if(mode == 0 ):
-        config_telnet(username,project_name,filename)
+        config_telnet(filename)
     else :
         maj()
     print("Fin main configuration Telnet")
