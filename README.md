@@ -6,7 +6,7 @@ Projet de NAS, 1er semestre 2021 4ème année
 Le projet est divisé en plusieurs éléments : 
  - un fichier .gns3 qui est constitué de notre topologie sans aucune configuration.
  - un fichier .json qui représente notre configuration sous un format spécifique.
- plusieurs facons de mettre à jour la configuration de notre réseau avec une nouvelle configuration
+ - plusieurs facons de mettre à jour la configuration de notre réseau avec une nouvelle configuration
 
 1ère facon de faire :
 
