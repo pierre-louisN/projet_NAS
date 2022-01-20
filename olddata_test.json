@@ -349,7 +349,7 @@
         "name": "R11",
         "id": "node11_id",
         "port": "5010",
-        "type": "PEc",
+        "type": "PE",
         "bgp_as": "113",
         "interfaces": [{
             "link": "0",
@@ -376,7 +376,7 @@
         "name": "R12",
         "port": "5011",
         "id": "node12_id",
-        "type": "PEc",
+        "type": "P",
         "bgp_as": "114",
         "interfaces": [{
             "link": "0",

@@ -93,15 +93,15 @@ def get_neighbors(as_number,router_name,router_type, data):
             for link in data["links"] :
                 if(link["router1"]==router_name and router["name"]==link["router2"] and router["type"]=="PEc") :
                     subnet_num = str(get_subnet_num(link['num'],router["name"],data))
-                    #tab.append([(b'10.10.'+link['num'].encode('ascii')+b'.'+subnet_num.encode('ascii')),router["bgp_as"],router["type"]]) 
-                    tab.append([get_routerID(router['name'][1:]),router["bgp_as"],router["type"],link["num"]])
+                    tab.append([(b'10.10.'+link['num'].encode('ascii')+b'.'+subnet_num.encode('ascii')),router["bgp_as"],router["type"],link["num"]]) 
+                    #tab.append([get_routerID(router['name'][1:]),router["bgp_as"],router["type"],link["num"]])
 
         if(router_type=="PEc"):
             for link in data["links"] :
                 if(link["router2"]==router_name and router["name"]==link["router1"] and router["type"]=="PE") :
                     subnet_num = str(get_subnet_num(link['num'],router["name"],data))
-                    tab.append([get_routerID(router['name'][1:]),router["bgp_as"],router["type"],link["num"]])
-                    #tab.append([(b'10.10.'+link['num'].encode('ascii')+b'.'+subnet_num.encode('ascii')),router["bgp_as"],router["type"]]) 
+                    #tab.append([get_routerID(router['name'][1:]),router["bgp_as"],router["type"],link["num"]])
+                    tab.append([(b'10.10.'+link['num'].encode('ascii')+b'.'+subnet_num.encode('ascii')),router["bgp_as"],router["type"],link["num"]]) 
 
     return tab
 
@@ -116,9 +116,12 @@ def config_BGP(tn,as_number,router_name,data,router_type,subnets):
     print(neighbors)
     for neighbor in neighbors :
         tn.write(b"neighbor "+neighbor[0]+b" remote-as "+neighbor[1].encode('ascii')+b" \r")
-        #if not((router_type=="PE" and neighbor[2]=="PEc") or (router_type=="PEc" and neighbor[2]=="PE")) : # si ce n'est pas un lien entre PE et CE
-        tn.write(b"neighbor "+neighbor[0]+b" update-source Loopback0 \r")
-        if(neighbor[1]!=as_number):
+        if not((router_type=="PE" and neighbor[2]=="PEc") or (router_type=="PEc" and neighbor[2]=="PE")) : # si ce n'est pas un lien entre PE et CE
+            tn.write(b"neighbor "+neighbor[0]+b" update-source Loopback0 \r")
+        print(as_number)
+        print(router_type)
+        print(neighbor[1])
+        if(neighbor[1]!=as_number and router_type=="PE" and as_number=="110"):
             if(neighbor[2]=="P"):
                 tn.write(b'neighbor 10.10.'+(neighbor[3].encode('ascii'))+b'.2 route-map PROVIDER_IN in \r')
                 tn.write(b'neighbor 10.10.'+(neighbor[3].encode('ascii'))+b'.2 route-map PROVIDER_OUT out \r')
@@ -196,7 +199,8 @@ def config_telnet(user,project,filename):
                     #if(router_conf['folder_name']) :
                     #os.system("rm /home/"+username+"/GNS3/projects/"+project_name+"/project-files/dynamips/"+router_conf['folder_name']+"/configs/i"+router_conf['name'][1:]+"_startup-config.cfg")
                     #time.sleep(5)
-
+                    if(router_conf["name"]!="R7"): 
+                        continue
                         #pour sauter les lignes d'initialisation du terminal
                     for i in range (1,5):
                         tn.write(b'\r')        
@@ -218,7 +222,7 @@ def config_telnet(user,project,filename):
                         if(interface['state'] == "up"):
                             try :
                                 if(router_conf["type"]!="PEc") :
-
+                                    
                                     for protocol in interface['protocols']:  
 
                                         try :     
