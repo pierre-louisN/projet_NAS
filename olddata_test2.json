@@ -41,7 +41,7 @@
         "folder_name": "a64c3950-0927-40ea-b561-1991eefc705d"
     }, {
         "name": "R2",
-        "id": "node2_id2",
+        "id": "node2_id",
         "type": "P",
         "type_as" : "",
         "port": "5001",

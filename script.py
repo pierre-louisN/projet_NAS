@@ -6,6 +6,7 @@ import time
 import sys
 #from jsondiff import diff
 
+
 def get_routerID(router_num) :
     router_id_base=router_num.encode('ascii')
     router_id = router_id_base+b'.'+router_id_base+b'.'+router_id_base+b'.'+router_id_base
@@ -144,7 +145,7 @@ def config_BGP(tn,as_number,router_name,data,router_type,subnets,type_as):
                 tn.write(b'conf t \r')
                 tn.write(b'route-map PROVIDER_OUT permit 10 \r')
                 tn.write(b'match community 10 \r')
-                tn.write(b'continue \r')
+                #tn.write(b'continue \r')
                 tn.write(b'end \r')
                 tn.write(b'conf t \r')
                 tn.write(b'route-map PROVIDER_IN permit 30 \r')
@@ -164,7 +165,7 @@ def config_BGP(tn,as_number,router_name,data,router_type,subnets,type_as):
                 tn.write(b'conf t \r')
                 tn.write(b'route-map PEER_OUT permit 10 \r')
                 tn.write(b'match community 10 \r')
-                tn.write(b'continue \r')
+                #tn.write(b'continue \r')
                 tn.write(b'end \r')
                 tn.write(b'conf t \r')
                 tn.write(b'route-map PEER_IN permit 30 \r')
@@ -601,8 +602,8 @@ if __name__ == "__main__":
         filename = sys.argv[1] 
         mode = sys.argv[2]
     else : #argument par défaut 
-        #filename = 'olddata_test2.json'
-        filename = 'olddata_test.json'
+        filename = 'olddata_test2.json'
+        #filename = 'olddata_test.json'
         mode = 0
     if(mode == 0 ):
         config_telnet(filename)
