@@ -93,7 +93,7 @@ def get_neighbors(as_number,router_name,router_type, data):
             for link in data["links"] :
                 if(link["router1"]==router_name and router["name"]==link["router2"] and router["type"]=="PEc") :
                     subnet_num = str(get_subnet_num(link['num'],router["name"],data))
-                    tab.append([(b'10.10.'+link['num'].encode('ascii')+b'.'+subnet_num.encode('ascii')),router["bgp_as"],router["type"],link["num"]]) 
+                    tab.append([(b'10.10.'+link['num'].encode('ascii')+b'.'+subnet_num.encode('ascii')),router["bgp_as"],router["type_as"],link["num"]]) 
                     #tab.append([get_routerID(router['name'][1:]),router["bgp_as"],router["type"],link["num"]])
 
         if(router_type=="PEc"):
@@ -101,7 +101,7 @@ def get_neighbors(as_number,router_name,router_type, data):
                 if(link["router2"]==router_name and router["name"]==link["router1"] and router["type"]=="PE") :
                     subnet_num = str(get_subnet_num(link['num'],router["name"],data))
                     #tab.append([get_routerID(router['name'][1:]),router["bgp_as"],router["type"],link["num"]])
-                    tab.append([(b'10.10.'+link['num'].encode('ascii')+b'.'+subnet_num.encode('ascii')),router["bgp_as"],router["type"],link["num"]]) 
+                    tab.append([(b'10.10.'+link['num'].encode('ascii')+b'.'+subnet_num.encode('ascii')),router["bgp_as"],router["type_as"],link["num"]]) 
 
     return tab
 
@@ -111,10 +111,10 @@ def config_BGP(tn,as_number,router_name,data,router_type,subnets):
     tn.write(b"router bgp "+as_number.encode('ascii')+b" \r")
     tn.write(b"no sync \r")
     tn.write(b"bgp router-id "+get_routerID(router_name[1:])+b" \r")
-    
+    time.sleep(5)
     neighbors = get_neighbors(as_number,router_name,router_type,data) #récupére les voisins 
     print(neighbors)
-    for neighbor in neighbors :
+    for neighbor in neighbors:
         tn.write(b"neighbor "+neighbor[0]+b" remote-as "+neighbor[1].encode('ascii')+b" \r")
         if not((router_type=="PE" and neighbor[2]=="PEc") or (router_type=="PEc" and neighbor[2]=="PE")) : # si ce n'est pas un lien entre PE et CE
             tn.write(b"neighbor "+neighbor[0]+b" update-source Loopback0 \r")
@@ -122,7 +122,7 @@ def config_BGP(tn,as_number,router_name,data,router_type,subnets):
         print(router_type)
         print(neighbor[1])
         if(neighbor[1]!=as_number and router_type=="PE" and as_number=="110"):
-            if(neighbor[2]=="P"):
+            if(neighbor[2]=="Provider"):
                 tn.write(b'neighbor 10.10.'+(neighbor[3].encode('ascii'))+b'.2 route-map PROVIDER_IN in \r')
                 tn.write(b'neighbor 10.10.'+(neighbor[3].encode('ascii'))+b'.2 route-map PROVIDER_OUT out \r')
                 tn.write(b'end \r')
@@ -137,7 +137,7 @@ def config_BGP(tn,as_number,router_name,data,router_type,subnets):
                 tn.write(b'set local-preference 50 \r')
                 tn.write(b'set community '+neighbor[1].encode('ascii')+b':5 \r')
 
-            elif(neighbor[2]=="PE") :
+            elif(neighbor[2]=="Peer") :
                 tn.write(b'neighbor 10.10.'+(neighbor[3].encode('ascii'))+b'.2 route-map PEER_IN in \r')
                 tn.write(b'neighbor 10.10.'+(neighbor[3].encode('ascii'))+b'.2 route-map PEER_OUT out \r')
                 tn.write(b'end \r')
@@ -152,7 +152,7 @@ def config_BGP(tn,as_number,router_name,data,router_type,subnets):
                 tn.write(b'set local-preference 100 \r')
                 tn.write(b'set community '+neighbor[1].encode('ascii')+b':100 \r')
             
-            elif(neighbor[2]=="PEc") :
+            elif(neighbor[2]=="Client") :
                 tn.write(b'neighbor 10.10.'+(neighbor[3].encode('ascii'))+b'.2 route-map CLIENT in \r')
                 tn.write(b'end \r')
                 tn.write(b'conf t \r')
@@ -165,7 +165,11 @@ def config_BGP(tn,as_number,router_name,data,router_type,subnets):
         time.sleep(1)
         tn.write(b'conf t \r')
         tn.write(b"router bgp "+as_number.encode('ascii')+b" \r")
-       
+    
+    tn.write(b'end \r')
+    time.sleep(1)
+    tn.write(b'conf t \r')
+    tn.write(b"router bgp "+as_number.encode('ascii')+b" \r")
     if(router_type!="P"): # si le routeur courant est n'est pas un provider
         for subnets_routers in subnets[router_name] :
             print(subnets_routers)
@@ -175,8 +179,6 @@ def config_BGP(tn,as_number,router_name,data,router_type,subnets):
     tn.write(b' \r ')
 
 def config_telnet(user,project,filename):
-#   os.system("rm /home/strack/GNS3/projects/test/project-files/dynamips/c408e2c4-a1c6-4fcd-9c09-2a86e9afc405/configs/i2_startup-config.cfg")
-    os.system('python3 insert_folder.py')
     time.sleep(1)
     username = user
     project_name =  project
@@ -199,8 +201,8 @@ def config_telnet(user,project,filename):
                     #if(router_conf['folder_name']) :
                     #os.system("rm /home/"+username+"/GNS3/projects/"+project_name+"/project-files/dynamips/"+router_conf['folder_name']+"/configs/i"+router_conf['name'][1:]+"_startup-config.cfg")
                     #time.sleep(5)
-                    if(router_conf["name"]!="R7"): 
-                        continue
+                    #if(router_conf['name']!="R9"):
+                    #    continue
                         #pour sauter les lignes d'initialisation du terminal
                     for i in range (1,5):
                         tn.write(b'\r')        
@@ -226,7 +228,7 @@ def config_telnet(user,project,filename):
                                     for protocol in interface['protocols']:  
 
                                         try :     
-                                            if(router_conf['ospf_area_id']) :
+                                            if(router_conf['ospf_area_id']):
                                                     print('Generation of OSPF config on router : '+ router_conf['name'] + ' for interface '+ interface['name']+'\n')
                                                     config_OSPF(tn,interface['name'],router_conf['ospf_process_id'],router_conf['ospf_area_id'])
                                         except KeyError :
@@ -249,8 +251,9 @@ def config_telnet(user,project,filename):
                                         except KeyError :
                                             print("BGP not implented")
                                 else :
+                                    print("AS BGP :"+router_conf["bgp_as"])
                                     try :
-                                        if(router_conf["bgp_as"]): 
+                                        if(router_conf["bgp_as"]):
                                             print('Generation of BGP config on router : '+ router_conf['name'] + ' for interface '+ interface['name']+'\n')
                                             # pour l'instant on le met en sur 
                                             as_number = router_conf["bgp_as"] # pour l'instant, on le met en dur mais après il faudra le rajouter dans le json pour chaque routeur 
@@ -390,7 +393,7 @@ def maj():
             subnets[router_conf['name']] = []
                 
             try:   
-                #with telnetlib.Telnet(HOST, port) as tn:
+                with telnetlib.Telnet(HOST, port) as tn:
                     #search if a router from the new json is in the old json 
                     
                     # os.system("rm /home/"+username+"/GNS3/projects/"+project_name+"/project-files/dynamips/"+router_conf['folder_name']+"/configs/i"+router_conf['name'][1:]+"_startup-config.cfg")
@@ -484,9 +487,8 @@ def create_router(tn,router_conf,data,subnets):
 
 if __name__ == "__main__":
     print("Début main configuration Telnet")
-    maj()
 
-    '''if len(sys.argv) >= 4 :
+    if len(sys.argv) >= 4 :
         username = sys.argv[1]
         project_name =  sys.argv[2]
         filename = sys.argv[3] 
@@ -499,6 +501,6 @@ if __name__ == "__main__":
     if(mode == 0 ):
         config_telnet(username,project_name,filename)
     else :
-        maj()'''
+        maj()
     print("Fin main configuration Telnet")
 
