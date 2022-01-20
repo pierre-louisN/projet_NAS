@@ -10,7 +10,7 @@ Le projet est divisé en plusieurs éléments :
 
 1ère facon de faire :
 
-branche samitest 
+branche Phase 2
 -On utilise script.py qui a deux modes de configuration : 
 
 `$ script.py 0`
