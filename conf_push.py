@@ -1,6 +1,7 @@
 from glob import glob
 import json
 from os import path
+from xml.sax.handler import all_properties
 
 save_id = ""
 
@@ -42,7 +43,7 @@ def conf_inter_down(fichier, router_conf, interface):
     fichier.write("interface "+str(interface['name'])+"\n")
     fichier.write(" no ip address\n")
     fichier.write(" shutdown\n")
-    #fichier.write(" duplex full\n")
+    # fichier.write(" duplex full\n")
     fichier.write("! Fin config d interface \n")
 
 
@@ -193,14 +194,22 @@ def conf_bgp(fichier, router_conf, data):
                                 address = "1.1."+link["num"]+".2"
                                 fichier.write(
                                     " neighbor "+address+" remote-as "+other_router['bgp_as']+"\n")
-                                community.append(address)
-                                community.append(
-                                    other_router['community_type'])
+                                # community ici de base
+                                global save_as_neighb
+                                save_as_neighb = other_router['bgp_as']
                             elif ((link['router2'] == router_conf["name"]) & (link['router1'] == other_router['name'])):
                                 address = "1.1."+link["num"]+".1"
                                 fichier.write(
                                     " neighbor "+address+" remote-as "+other_router['bgp_as']+"\n")
 
+    if (router_conf["type"] == "PE"):
+        for commu in community:
+
+            fichier.write(" neighbor "+commu[0] + " route-map ")
+            fichier.write(commu[1]+" in\n")
+            if "CLIENT" in commu:
+                fichier.write(" neighbor "+commu[0] + " route-map ")
+                fichier.write(commu[1]+"_OUT out\n")
     fichier.write("!\n")
     # Ici pour les routeurs de bordures indiqué les chemins network mask + Loopbackk
     # Les activates sont useless
@@ -209,17 +218,13 @@ def conf_bgp(fichier, router_conf, data):
         if (router_conf["type"] == "PE"):
             for network in networks:
                 fichier.write("  "+network)
-            '''  
-            fichier.write("  neighbor "+community[0] + " route-map ")
-            fichier.write(community[1]+"_IN in\n")
-            fichier.write("  neighbor "+community[0] + " route-map ")
-            fichier.write(community[1]+"_IN out\n")
-            '''
+
         if (router_conf["type"] == "P"):
             fichier.write("  network "+loop_add + " mask 255.255.255.255\n")
         if (router_conf["type"] == "PEc"):
             fichier.write(
                 "  network "+community[0][:6] + "0 mask 255.255.255.252\n")
+
         fichier.write(" exit-address-family\n")
 
 
@@ -231,15 +236,85 @@ def conf_ospf(fichier, router_conf, data):
     fichier.write(" network " + address_loop+" 0.0.0.0 area 0\n")
 
 
+def conf_bgp_community(fichier, router_conf, data):
+    global save_as_neighb
+    value = ""
+    fichier.write("ip community-list 1 permit internet\n")
+
+    fichier.write("!\n")
+    if (router_conf['type'] == "PE"):
+        for commu in community:
+            if (commu[1] == "PROVIDER"):
+                localpref = "50"
+            if (commu[1] == "PEER"):
+                localpref = "100"
+            if (commu[1] == "CLIENT"):
+                localpref = "150"
+            fichier.write("ip community-list 10 permit " +
+                          commu[2]+":"+localpref+"\n")
+        already_client = 0
+        for commu in community:
+            if ((commu[1] == "CLIENT") & (already_client)):
+                continue
+            if (commu[1] == "CLIENT"):
+                fichier.write("route-map "+commu[1]+" permit 10\n")
+                fichier.write(" match community 1\n")
+                already_client = 1
+                value = "150"
+                fichier.write(" set local-preference "+value+"\n")
+                fichier.write("route-map "+commu[1]+"_OUT permit 10\n")
+                fichier.write(" match community 1\n")
+                fichier.write(" set local-preference "+value+"\n")
+
+            elif(commu[1] == "PROVIDER"):
+                fichier.write("route-map "+commu[1]+" permit 10\n")
+                fichier.write(" match community 10\n")
+                value = "50"
+                fichier.write(" set local-preference "+value+"\n")
+
+            elif(commu[1] == "PEER"):
+                fichier.write("route-map "+commu[1]+" permit 10\n")
+                fichier.write(" match community 10\n")
+                value = "100"
+            fichier.write("!\n")
+            fichier.write("!\n")
+
+
+def build_communities(data):
+    global save_as_neighb
+    for all_router in data['routers']:
+        for other_router in data['routers']:
+            twoPE_routers = (all_router["type"] == "PE") & (
+                other_router["type"] == "PEc")
+            if (twoPE_routers):
+                for interface in all_router["interfaces"]:
+
+                    if (interface['name'] != "Loopback0") & (interface['state'] == 'up'):
+                        # Routers_connected
+                        if interface['router'] == other_router['name']:
+                            for link in data["links"]:
+                                if ((link['router1'] == all_router["name"]) & (link['router2'] == other_router['name'])):
+                                    address = "1.1."+link["num"]+".2"
+                                    save_as_neighb = other_router["bgp_as"]
+                                    little_com = [
+                                        address, other_router['community_type'], save_as_neighb]
+                                    if little_com not in community:
+                                        community.append(little_com)
+
+
 if __name__ == "__main__":
     global ospf
+    global save_as_neighb
     ospf = 0
+    save_as_neighb = 0
 
     with open('data_cop.json', 'r') as json_file:
         data = json.load(json_file)
     # there is a file to push for each router to configure
     networks = []
     community = []
+    build_communities(data)
+
     for router_conf in data['routers']:
         # Commentaire à enlever pour le vrai test
         path = "OSPF/project-files/dynamips/"
@@ -266,9 +341,10 @@ if __name__ == "__main__":
         ospf = 0
         if "bgp_as" in router_conf:
             conf_bgp(fichier, router_conf, data)
+            conf_bgp_community(fichier, router_conf, data)
+        save_as_neighb = 0
         print(community)
         conf_end(fichier)
-        community.clear()
         fichier.close()
         networks.clear()
         """"Problème d'itération quand on write sur le fichier
