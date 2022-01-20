@@ -300,6 +300,20 @@ def has_a_diff(json1, json2):
 
     return (json1==json2)
 
+
+def router_shutdown(tn,router):
+    for interface in router['interfaces']:
+        interface_shutdown(tn,interface['name'])
+        
+
+
+def interface_shutdown(tn,name):
+    tn.write(b" conf t\r")
+    tn.write(b" int "+name.encode('ascii')+b" \r")
+    tn.write(b"shut  \r")
+    tn.write(b"end \r")
+    
+
 #search name in json1 group 
 def search_name( json1,group,name):
    
@@ -309,7 +323,7 @@ def search_protocol (json1,name):
     return [obj for obj in json1 if obj==name]
 
 def maj():
-    os.system('python3 insert_folder.py')
+    #os.system('python3 insert_folder.py')
     time.sleep(1)
     username = "sstrack"
     project_name =  "OSPF"
@@ -318,28 +332,28 @@ def maj():
 
     with open('newdata_test.json') as json_file:
         data = json.load(json_file)
-
+    
         ancien_data=get_ancien_json('olddata_test.json')
         subnets= {}
         for router_conf in data['routers']:
             port = router_conf['port']
-            print("Router "+router_conf['name']+" port n° : " + str(port))
+            #print("Router "+router_conf['name']+" port n° : " + str(port))
             subnets[router_conf['name']] = []
                 
             try:   
-                with telnetlib.Telnet(HOST, port) as tn:
+                #with telnetlib.Telnet(HOST, port) as tn:
                     #search if a router from the new json is in the old json 
                     
                    # os.system("rm /home/"+username+"/GNS3/projects/"+project_name+"/project-files/dynamips/"+router_conf['folder_name']+"/configs/i"+router_conf['name'][1:]+"_startup-config.cfg")
                     #os.system("rm /home/strack/Documents/NAS/"+project_name+"/project-files/dynamips/"+router_conf['folder_name']+"/configs/i"+router_conf['name'][1:]+"_startup-config.cfg")
-                    time.sleep(5)
+                    #time.sleep(5)
                     
                     
                     samerouter= search_name(ancien_data['routers'],'name',router_conf['name'])
                     #if we don't find it in the old json, we create it 
                     if not(samerouter):
                         print("we create "+router_conf['name']+" in the new json \n")
-                        create_router(tn,router_conf)
+                        #create_router(tn,router_conf)
                         
                     else:
                         '''with telnetlib.Telnet(HOST, port) as tn:
@@ -348,39 +362,48 @@ def maj():
                             for i in range (1,5):
                                     tn.write(b'\r')  '''
                         samerouter = samerouter[0]
-                        print(json.dumps(samerouter, indent=4, sort_keys=True))    
-                        print(json.dumps(router_conf['interfaces'][0]['link'], indent=4, sort_keys=True)) 
+                        #print(json.dumps(samerouter, indent=4, sort_keys=True))    
+                        #print(json.dumps(samerouter['interfaces'][0], indent=4, sort_keys=True)) 
                         print("fini")
                         for interface in router_conf['interfaces']:
-                            print(samerouter['interfaces'][0])
-                            samelink = search_name(samerouter['interfaces'][0],'link',interface['link'])
+                            #print(samerouter['interfaces'][0])
+                            samelink = search_name(samerouter['interfaces'],'link',interface['link'])
                             #linkinnew = search_name(router_conf['interfaces'],'link', samerouter['interfaces'])
                             if not(samelink):
                                 
                                 #config new link with the new protocols 
                                 print("link  "+interface['link']+" created in the new file \n")
-                                config_interface(tn,interface['name'],interface['link'],router_conf['name'],data,subnets)
+                                #config_interface(tn,interface['name'],interface['link'],router_conf['name'],data,subnets)
                             #print("samelink"+json.dumps(samelink, indent=4, sort_keys=True))
                             #print("porotocol : " +json.dumps(interface['protocols'], indent=4, sort_keys=True))
             except ConnectionRefusedError:
-                continue      
-                
-        for router_conf in ancien_data['routers']:
-            port = router_conf['port']
-            print("Router "+router_conf['name']+" port n° : " + str(port))
-            subnets[router_conf['name']] = []
+                continue  
 
+    with open('olddata_test.json') as json_file:
+        data = json.load(json_file)
+
+        ancien_data=get_ancien_json('newdata_test.json')
+        subnets= {}
+        for router_conf in data['routers']:
+            port = router_conf['port']
+            #print("Router "+router_conf['name']+" port n° : " + str(port))
+            subnets[router_conf['name']] = []
+                
             try:   
-                with telnetlib.Telnet(HOST, port) as tn:
-                    '''port = 5000 + (int)(router_conf['name'][1:]) - 1 
-                    print("Router "+router_conf['name']+" port n° : " + str(port))'''
-            
-                   # os.system("rm /home/"+username+"/GNS3/projects/"+project_name+"/project-files/dynamips/"+router_conf['folder_name']+"/configs/i"+router_conf['name'][1:]+"_startup-config.cfg")
-                   # time.sleep(5)
-                    samerouter= search_name(data['routers'],'name',router_conf['name'])
+                #with telnetlib.Telnet(HOST, port) as tn:
+                    #search if a router from the new json is in the old json 
+                    
+                    # os.system("rm /home/"+username+"/GNS3/projects/"+project_name+"/project-files/dynamips/"+router_conf['folder_name']+"/configs/i"+router_conf['name'][1:]+"_startup-config.cfg")
+                    #os.system("rm /home/strack/Documents/NAS/"+project_name+"/project-files/dynamips/"+router_conf['folder_name']+"/configs/i"+router_conf['name'][1:]+"_startup-config.cfg")
+                    #time.sleep(5)
+                    
+                    
+                    samerouter= search_name(ancien_data['routers'],'name',router_conf['name'])
                     #if we don't find it in the old json, we create it 
                     if not(samerouter):
                         print("we delete "+router_conf['name']+" in the new json \n")
+                        router_shutdown(tn,router_conf)
+                        
                     else:
                         '''with telnetlib.Telnet(HOST, port) as tn:
                             tn.set_debuglevel(1)
@@ -389,20 +412,24 @@ def maj():
                                     tn.write(b'\r')  '''
                         samerouter = samerouter[0]
                         #print(json.dumps(samerouter, indent=4, sort_keys=True))    
-                        #print(json.dumps(router_conf['interfaces'][0], indent=4, sort_keys=True)) 
+                        #print(json.dumps(samerouter['interfaces'][0], indent=4, sort_keys=True)) 
                         print("fini")
                         for interface in router_conf['interfaces']:
+                            #print(samerouter['interfaces'][0])
                             samelink = search_name(samerouter['interfaces'],'link',interface['link'])
                             #linkinnew = search_name(router_conf['interfaces'],'link', samerouter['interfaces'])
                             if not(samelink):
                                 
                                 #config new link with the new protocols 
                                 print("link  "+interface['link']+" deleted in the new file \n")
-                                interface_shutdown(tn,interface['name'])
+                                interface_shutdown(tn,interface['link'])
+                                #config_interface(tn,interface['name'],interface['link'],router_conf['name'],data,subnets)
                             #print("samelink"+json.dumps(samelink, indent=4, sort_keys=True))
                             #print("porotocol : " +json.dumps(interface['protocols'], indent=4, sort_keys=True))
             except ConnectionRefusedError:
-                continue   
+                continue  
+                
+       
                             
 def create_router(tn,router_conf,data,subnets):
     try : 
@@ -457,21 +484,21 @@ def create_router(tn,router_conf,data,subnets):
 
 if __name__ == "__main__":
     print("Début main configuration Telnet")
+    maj()
 
-
-    if len(sys.argv) >= 4 :
+    '''if len(sys.argv) >= 4 :
         username = sys.argv[1]
         project_name =  sys.argv[2]
         filename = sys.argv[3] 
         mode = sys.argv[4]
     else : #argument par défaut 
-        username = "plnohet"
+        username = "sstrack"
         project_name =  "Basic"
         filename = 'olddata_test.json'
         mode = 0
     if(mode == 0 ):
         config_telnet(username,project_name,filename)
     else :
-        maj()
+        maj()'''
     print("Fin main configuration Telnet")
 
