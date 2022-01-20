@@ -11,7 +11,8 @@ Le projet est divisé en plusieurs éléments :
 1ère facon de faire :
 
 branche samitest 
-On utilise script.py qui a deux modes de configuration : 
+-On utilise script.py qui a deux modes de configuration : 
+
 `$ script.py 0`
 permet de mettre la configuration olddata_test2.json sur la topologie non-configuré du réseau.
 
