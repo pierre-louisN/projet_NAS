@@ -6,6 +6,7 @@ import time
 import sys
 #from jsondiff import diff
 
+
 def get_routerID(router_num) :
     router_id_base=router_num.encode('ascii')
     router_id = router_id_base+b'.'+router_id_base+b'.'+router_id_base+b'.'+router_id_base
@@ -124,6 +125,7 @@ def config_BGP(tn,as_number,router_name,data,router_type,subnets,type_as):
     print(neighbors)
     for neighbor in neighbors:
         tn.write(b"neighbor "+neighbor[0]+b" remote-as "+neighbor[1].encode('ascii')+b" \r")
+        
         time.sleep(0.1)
         print(neighbor)
         if (neighbor[1]=="110" and as_number=="110"):
@@ -133,8 +135,8 @@ def config_BGP(tn,as_number,router_name,data,router_type,subnets,type_as):
 
         if(neighbor[1]!=as_number and router_type=="PE" and as_number=="110"):
             
-            #clients = ["111","112"]
-            clients = get_clients(data)
+            clients = ["111","112"]
+            #clients = get_clients(data)
             print(clients)
             if(neighbor[2]=="Provider"):
                 tn.write(b'neighbor 10.10.'+(neighbor[3].encode('ascii'))+b'.2 route-map PROVIDER_IN in \r')
@@ -143,10 +145,10 @@ def config_BGP(tn,as_number,router_name,data,router_type,subnets,type_as):
                 tn.write(b'conf t \r')
                 tn.write(b'route-map PROVIDER_OUT permit 10 \r')
                 tn.write(b'match community 10 \r')
-                tn.write(b'continue \r')
+                #tn.write(b'continue \r')
                 tn.write(b'end \r')
-                tn.write(b'conf t')
-                tn.write(b'route-map PROVIDER_IN permit 30 \r')
+                tn.write(b'conf t \r')
+                tn.write(b'route-map PROVIDER_IN permit 10 \r')
                 tn.write(b'match community 1 \r')
                 tn.write(b'set local-preference 50 \r')
                 tn.write(b'set community '+neighbor[1].encode('ascii')+b':5 \r')
@@ -163,10 +165,10 @@ def config_BGP(tn,as_number,router_name,data,router_type,subnets,type_as):
                 tn.write(b'conf t \r')
                 tn.write(b'route-map PEER_OUT permit 10 \r')
                 tn.write(b'match community 10 \r')
-                tn.write(b'continue \r')
+                #tn.write(b'continue \r')
                 tn.write(b'end \r')
                 tn.write(b'conf t \r')
-                tn.write(b'route-map PEER_IN permit 30 \r')
+                tn.write(b'route-map PEER_IN permit 10 \r')
                 tn.write(b'match community 1 \r')
                 tn.write(b'set local-preference 100 \r')
                 tn.write(b'set community '+neighbor[1].encode('ascii')+b':100 \r')
@@ -183,11 +185,10 @@ def config_BGP(tn,as_number,router_name,data,router_type,subnets,type_as):
                 tn.write(b'match community 1 \r')
                 tn.write(b'set local-preference 150 \r')
                 tn.write(b'set community '+neighbor[1].encode('ascii')+b':150 \r')
-            time.sleep(0.1)
-            tn.write(b'end \r')
-            tn.write(b'conf t \r')
+            
+            
             tn.write(b'ip community-list 1 permit internet \r')
-        time.sleep(0.1)
+        
         tn.write(b'end \r')
         time.sleep(0.1)
         tn.write(b'conf t \r')
@@ -227,8 +228,8 @@ def config_telnet(filename):
                     #if(router_conf['folder_name']) :
                     #os.system("rm /home/"+username+"/GNS3/projects/"+project_name+"/project-files/dynamips/"+router_conf['folder_name']+"/configs/i"+router_conf['name'][1:]+"_startup-config.cfg")
                     #time.sleep(0.1)
-                    if(router_conf['name']!="R7"):
-                        continue
+                    #if(router_conf['name']!="R7"):
+                    #    continue
                         #pour sauter les lignes d'initialisation du terminal
                     for i in range (1,5):
                         tn.write(b'\r')        
@@ -391,7 +392,6 @@ def config_interface_protocol(tn,interface, router_conf,data, subnets):
         except KeyError :
             pass
 
-
 #search name in json1 group 
 def search_name( json1,group,name):
    
@@ -513,7 +513,7 @@ def maj():
        
                             
 def create_router(tn,router_conf,data,subnets,HOST):
-    #on part du principe que les routeurs sont crée les uns après les autres et dans l'ordre
+#on part du principe que les routeurs sont crée les uns après les autres et dans l'ordre
     #port = 5000 + (int)(router_conf['name'][1:]) - 1 
     port = router_conf['port']
     print("Router "+router_conf['name']+" port n° : " + str(port))
@@ -525,8 +525,8 @@ def create_router(tn,router_conf,data,subnets,HOST):
             #if(router_conf['folder_name']) :
             #os.system("rm /home/"+username+"/GNS3/projects/"+project_name+"/project-files/dynamips/"+router_conf['folder_name']+"/configs/i"+router_conf['name'][1:]+"_startup-config.cfg")
             #time.sleep(0.1)
-            if(router_conf['name']!="R7"):
-                pass
+            #if(router_conf['name']!="R7"):
+            #    continue
                 #pour sauter les lignes d'initialisation du terminal
             for i in range (1,5):
                 tn.write(b'\r')        
