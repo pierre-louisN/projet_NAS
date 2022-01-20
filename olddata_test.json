@@ -191,7 +191,7 @@
             "link": "8",
             "state": "up",
             "router": "R2",
-            "protocols": ["OSPF"],
+            "protocols": ["OSPF", "MPLS"],
             "name": "GigabitEthernet1/0"
         }],
         "folder_name": "78dd3191-91f4-4d4e-9686-64832b34c714"
@@ -213,7 +213,7 @@
             "link": "5",
             "state": "up",
             "router": "R1",
-            "protocols": ["OSPF"],
+            "protocols": ["OSPF", "MPLS"],
             "name": "GigabitEthernet1/0"
         }, {
             "state": "up",
@@ -227,7 +227,7 @@
             "link": "6",
             "state": "up",
             "router": "R2",
-            "protocols": ["OSPF"],
+            "protocols": ["OSPF", "MPLS"],
             "name": "FastEthernet0/0"
         }],
         "folder_name": "5f7f6dc2-2248-4c97-a1fb-8cf6223acc6b"
@@ -249,12 +249,13 @@
             "link": "11",
             "state": "up",
             "router": "R4",
+            "protocols": ["OSPF", "MPLS"],
             "name": "FastEthernet0/0"
         }, {
             "link": "9",
             "state": "up",
             "router": "R3",
-            "protocols": ["OSPF"],
+            "protocols": ["OSPF", "MPLS"],
             "name": "GigabitEthernet1/0"
         }, {
             "state": "up",
@@ -284,7 +285,7 @@
             "link": "12",
             "state": "up",
             "router": "R4",
-            "protocols": ["OSPF"],
+            "protocols": ["OSPF", "MPLS"],
             "name": "GigabitEthernet1/0"
         }, {
             "state": "down",
@@ -293,7 +294,7 @@
             "link": "10",
             "state": "up",
             "router": "R3",
-            "protocols": ["OSPF"],
+            "protocols": ["OSPF", "MPLS"],
             "name": "FastEthernet0/0"
         }, {
             "state": "up",
@@ -312,7 +313,6 @@
         "interfaces": [{
             "link": "0",
             "state": "up",
-            "protocols": ["OSPF"],
             "name": "Loopback0"
         },{
             "state": "up",
@@ -337,7 +337,6 @@
         "interfaces": [{
             "link": "0",
             "state": "up",
-            "protocols": ["OSPF"],
             "name": "Loopback0"
         },{
             "state": "up",
@@ -365,7 +364,6 @@
         "interfaces": [{
             "link": "0",
             "state": "up",
-            "protocols": ["OSPF"],
             "name": "Loopback0"
         },{
             "state": "up",
@@ -393,7 +391,6 @@
         "interfaces": [{
             "link": "0",
             "state": "up",
-            "protocols": ["OSPF"],
             "name": "Loopback0"
         },{
             "link": "16",
