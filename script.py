@@ -94,13 +94,13 @@ def get_neighbors(as_number,router_name,router_type, data):
                 if(link["router1"]==router_name and router["name"]==link["router2"] and router["type"]=="PEc") :
                     subnet_num = str(get_subnet_num(link['num'],router["name"],data))
                     #tab.append([(b'10.10.'+link['num'].encode('ascii')+b'.'+subnet_num.encode('ascii')),router["bgp_as"],router["type"]]) 
-                    tab.append([get_routerID(router['name'][1:]),router["bgp_as"],router["type"]])
+                    tab.append([get_routerID(router['name'][1:]),router["bgp_as"],router["type"],link["num"]])
 
         if(router_type=="PEc"):
             for link in data["links"] :
                 if(link["router2"]==router_name and router["name"]==link["router1"] and router["type"]=="PE") :
                     subnet_num = str(get_subnet_num(link['num'],router["name"],data))
-                    tab.append([get_routerID(router['name'][1:]),router["bgp_as"],router["type"]])
+                    tab.append([get_routerID(router['name'][1:]),router["bgp_as"],router["type"],link["num"]])
                     #tab.append([(b'10.10.'+link['num'].encode('ascii')+b'.'+subnet_num.encode('ascii')),router["bgp_as"],router["type"]]) 
 
     return tab
@@ -109,15 +109,60 @@ def get_neighbors(as_number,router_name,router_type, data):
 def config_BGP(tn,as_number,router_name,data,router_type,subnets):
     tn.write(b"conf t \r")    
     tn.write(b"router bgp "+as_number.encode('ascii')+b" \r")
-    tn.write(b"bgp router-id "+get_routerID(router_name[1:])+b" \r")
     tn.write(b"no sync \r")
+    tn.write(b"bgp router-id "+get_routerID(router_name[1:])+b" \r")
+    
     neighbors = get_neighbors(as_number,router_name,router_type,data) #récupére les voisins 
     print(neighbors)
     for neighbor in neighbors :
         tn.write(b"neighbor "+neighbor[0]+b" remote-as "+neighbor[1].encode('ascii')+b" \r")
         #if not((router_type=="PE" and neighbor[2]=="PEc") or (router_type=="PEc" and neighbor[2]=="PE")) : # si ce n'est pas un lien entre PE et CE
         tn.write(b"neighbor "+neighbor[0]+b" update-source Loopback0 \r")
-    
+        if(neighbor[1]!=as_number):
+            if(neighbor[2]=="P"):
+                tn.write(b'neighbor 10.10.'+(neighbor[3].encode('ascii'))+b'.2 route-map PROVIDER_IN in \r')
+                tn.write(b'neighbor 10.10.'+(neighbor[3].encode('ascii'))+b'.2 route-map PROVIDER_OUT out \r')
+                tn.write(b'end \r')
+                tn.write(b'conf t \r')
+                tn.write(b'route-map PROVIDER_OUT permit 10 \r')
+                tn.write(b'match community 10 \r')
+                tn.write(b'continue \r')
+                tn.write(b'end \r')
+                tn.write(b'conf t')
+                tn.write(b'route-map PROVIDER_IN permit 30 \r')
+                tn.write(b'match community 1 \r')
+                tn.write(b'set local-preference 50 \r')
+                tn.write(b'set community '+neighbor[1].encode('ascii')+b':5 \r')
+
+            elif(neighbor[2]=="PE") :
+                tn.write(b'neighbor 10.10.'+(neighbor[3].encode('ascii'))+b'.2 route-map PEER_IN in \r')
+                tn.write(b'neighbor 10.10.'+(neighbor[3].encode('ascii'))+b'.2 route-map PEER_OUT out \r')
+                tn.write(b'end \r')
+                tn.write(b'conf t \r')
+                tn.write(b'route-map PROVIDER_OUT permit 10 \r')
+                tn.write(b'match community 10 \r')
+                tn.write(b'continue \r')
+                tn.write(b'end \r')
+                tn.write(b'conf t \r')
+                tn.write(b'route-map PEER_IN permit 30 \r')
+                tn.write(b'match community 1 \r')
+                tn.write(b'set local-preference 100 \r')
+                tn.write(b'set community '+neighbor[1].encode('ascii')+b':100 \r')
+            
+            elif(neighbor[2]=="PEc") :
+                tn.write(b'neighbor 10.10.'+(neighbor[3].encode('ascii'))+b'.2 route-map CLIENT in \r')
+                tn.write(b'end \r')
+                tn.write(b'conf t \r')
+                tn.write(b'route-map CLIENT_IN permit 10 \r')
+                tn.write(b'match community 1 \r')
+                tn.write(b'set local-preference 150 \r')
+                tn.write(b'set community '+neighbor[1].encode('ascii')+b':150 \r')
+        
+        tn.write(b'end \r')
+        time.sleep(1)
+        tn.write(b'conf t \r')
+        tn.write(b"router bgp "+as_number.encode('ascii')+b" \r")
+       
     if(router_type!="P"): # si le routeur courant est n'est pas un provider
         for subnets_routers in subnets[router_name] :
             print(subnets_routers)
@@ -149,8 +194,8 @@ def config_telnet(user,project,filename):
                     # 0 : enlève les write du terminal, 1 : met les print dans le terminal 
                     tn.set_debuglevel(1)
                     #if(router_conf['folder_name']) :
-                    os.system("rm /home/"+username+"/GNS3/projects/"+project_name+"/project-files/dynamips/"+router_conf['folder_name']+"/configs/i"+router_conf['name'][1:]+"_startup-config.cfg")
-                    time.sleep(5)
+                    #os.system("rm /home/"+username+"/GNS3/projects/"+project_name+"/project-files/dynamips/"+router_conf['folder_name']+"/configs/i"+router_conf['name'][1:]+"_startup-config.cfg")
+                    #time.sleep(5)
 
                         #pour sauter les lignes d'initialisation du terminal
                     for i in range (1,5):
@@ -173,6 +218,7 @@ def config_telnet(user,project,filename):
                         if(interface['state'] == "up"):
                             try :
                                 if(router_conf["type"]!="PEc") :
+
                                     for protocol in interface['protocols']:  
 
                                         try :     
@@ -220,7 +266,6 @@ def config_telnet(user,project,filename):
                 continue
 
 
-
 def deconfig_OSPF(tn, interface_name,process_id,area_id):
     tn.write(b'enable \r')
     tn.write(b'conf t \r')
@@ -251,44 +296,158 @@ def has_a_diff(json1, json2):
 
     return (json1==json2)
 
-#return a specific json with the same id 
+#search name in json1 group 
 def search_name( json1,group,name):
    
     return [obj for obj in json1 if obj[group]==name]
 
-#def maj():
+def search_protocol (json1,name):
+    return [obj for obj in json1 if obj==name]
+
+def maj():
+    os.system('python3 insert_folder.py')
+    time.sleep(1)
+    username = "sstrack"
+    project_name =  "OSPF"
+    HOST = "127.0.0.1"
 
 
-"""     with open('data_cop.json') as json_file:
+    with open('newdata_test.json') as json_file:
         data = json.load(json_file)
 
-        ancien_data=get_ancien_json('data.json')
-        
+        ancien_data=get_ancien_json('olddata_test.json')
+        subnets= {}
         for router_conf in data['routers']:
-            port = 5000 + (int)(router_conf['name'][1:]) - 1 
+            port = router_conf['port']
             print("Router "+router_conf['name']+" port n° : " + str(port))
-
-            #get the router with the same name 
-            samerouter= search_name(router_conf,'name',ancien_data['routers']['name'])
-            if (samerouter):
+            subnets[router_conf['name']] = []
+                
+            try:   
                 with telnetlib.Telnet(HOST, port) as tn:
-                    tn.set_debuglevel(1)
+                    #search if a router from the new json is in the old json 
+                    
+                   # os.system("rm /home/"+username+"/GNS3/projects/"+project_name+"/project-files/dynamips/"+router_conf['folder_name']+"/configs/i"+router_conf['name'][1:]+"_startup-config.cfg")
+                    #os.system("rm /home/strack/Documents/NAS/"+project_name+"/project-files/dynamips/"+router_conf['folder_name']+"/configs/i"+router_conf['name'][1:]+"_startup-config.cfg")
+                    time.sleep(5)
+                    
+                    
+                    samerouter= search_name(ancien_data['routers'],'name',router_conf['name'])
+                    #if we don't find it in the old json, we create it 
+                    if not(samerouter):
+                        print("we create "+router_conf['name']+" in the new json \n")
+                        create_router(tn,router_conf)
+                        
+                    else:
+                        '''with telnetlib.Telnet(HOST, port) as tn:
+                            tn.set_debuglevel(1)
 
-                    for i in range (1,5):
-                            tn.write(b'\r')  
+                            for i in range (1,5):
+                                    tn.write(b'\r')  '''
+                        samerouter = samerouter[0]
+                        print(json.dumps(samerouter, indent=4, sort_keys=True))    
+                        print(json.dumps(router_conf['interfaces'][0]['link'], indent=4, sort_keys=True)) 
+                        print("fini")
+                        for interface in router_conf['interfaces']:
+                            print(samerouter['interfaces'][0])
+                            samelink = search_name(samerouter['interfaces'][0],'link',interface['link'])
+                            #linkinnew = search_name(router_conf['interfaces'],'link', samerouter['interfaces'])
+                            if not(samelink):
+                                
+                                #config new link with the new protocols 
+                                print("link  "+interface['link']+" created in the new file \n")
+                                config_interface(tn,interface['name'],interface['link'],router_conf['name'],data,subnets)
+                            #print("samelink"+json.dumps(samelink, indent=4, sort_keys=True))
+                            #print("porotocol : " +json.dumps(interface['protocols'], indent=4, sort_keys=True))
+            except ConnectionRefusedError:
+                continue      
+                
+        for router_conf in ancien_data['routers']:
+            port = router_conf['port']
+            print("Router "+router_conf['name']+" port n° : " + str(port))
+            subnets[router_conf['name']] = []
 
-                    for interface in router_conf['interfaces']:
-                        samelink = search_name(samerouter,'link',interface['link'])
-                        if not(samelink):
-                            #deconfig link 
+            try:   
+                with telnetlib.Telnet(HOST, port) as tn:
+                    '''port = 5000 + (int)(router_conf['name'][1:]) - 1 
+                    print("Router "+router_conf['name']+" port n° : " + str(port))'''
+            
+                   # os.system("rm /home/"+username+"/GNS3/projects/"+project_name+"/project-files/dynamips/"+router_conf['folder_name']+"/configs/i"+router_conf['name'][1:]+"_startup-config.cfg")
+                   # time.sleep(5)
+                    samerouter= search_name(data['routers'],'name',router_conf['name'])
+                    #if we don't find it in the old json, we create it 
+                    if not(samerouter):
+                        print("we delete "+router_conf['name']+" in the new json \n")
+                    else:
+                        '''with telnetlib.Telnet(HOST, port) as tn:
+                            tn.set_debuglevel(1)
+
+                            for i in range (1,5):
+                                    tn.write(b'\r')  '''
+                        samerouter = samerouter[0]
+                        #print(json.dumps(samerouter, indent=4, sort_keys=True))    
+                        #print(json.dumps(router_conf['interfaces'][0], indent=4, sort_keys=True)) 
+                        print("fini")
+                        for interface in router_conf['interfaces']:
+                            samelink = search_name(samerouter['interfaces'],'link',interface['link'])
+                            #linkinnew = search_name(router_conf['interfaces'],'link', samerouter['interfaces'])
+                            if not(samelink):
+                                
+                                #config new link with the new protocols 
+                                print("link  "+interface['link']+" deleted in the new file \n")
+                                interface_shutdown(tn,interface['name'])
+                            #print("samelink"+json.dumps(samelink, indent=4, sort_keys=True))
+                            #print("porotocol : " +json.dumps(interface['protocols'], indent=4, sort_keys=True))
+            except ConnectionRefusedError:
+                continue   
                             
-                            #shutdown pour supprimer le lien et interrompre le transfert de paquet 
-                        for interface2 in ancien_data['routers']['interfaces']:
-                            if (interface['name']==interface2['name']):
-                                if(has_a_diff(interface['name'],interface['name'])):
-                                    deconfig_interface(tn,interface) """
+def create_router(tn,router_conf,data,subnets):
+    try : 
+                  
+    
+        # 0 : enlève les write du terminal, 1 : met les print dans le terminal 
+        tn.set_debuglevel(0)
+        #if(router_conf['folder_name']) :
+            #os.system("rm /home/"+username+"/GNS3/projects/"+project_name+"/project-files/dynamips/"+router_conf['folder_name']+"/configs/i"+router_conf['name'][1:]+"_startup-config.cfg")
+            #time.sleep(5)
 
+            #pour sauter les lignes d'initialisation du terminal
+        for i in range (1,5):
+            tn.write(b'\r')        
 
+        for interface in router_conf['interfaces']:
+            if(interface['state'] == "up"):
+                config_interface(tn,interface['name'],interface['link'],router_conf['name'],data,subnets)
+
+        if(router_conf['ospf_area_id']) :
+            print("OSPF activated on router :",router_conf['name'])
+            router_activate_OSPF(tn,router_conf['name'][1:],router_conf['ospf_process_id'])
+
+        MPLS_activated = False
+        for interface in router_conf['interfaces']:
+            if(interface['state'] == "up"):
+                for protocol in interface['protocols']:      
+                    if(protocol == "OSPF") :
+                            print('Generation of OSPF config on router : '+ router_conf['name'] + ' for interface '+ interface['name']+'\n')
+                            config_OSPF(tn,interface['name'],router_conf['ospf_process_id'],router_conf['ospf_area_id'])
+
+                    if (protocol == "MPLS"):
+                        if(MPLS_activated==False):  #commande pour activer MPLS sur le routeur, on le fait que une seule fois
+                            router_activate_MPLS(tn,router_conf['name'])
+                            MPLS_activated = True
+                        
+                        print('Generation of MPLS config on router : '+ router_conf['name'] + ' for interface '+ interface['name']+'\n')
+                        config_MPLS(tn,interface['name'])
+                    
+                    if (router_conf["bgp_as"]): # pas encore fini
+                        print('Generation of BGP config on router : '+ router_conf['name'] + ' for interface '+ interface['name']+'\n')
+                        # pour l'instant on le met en sur 
+                        as_number = router_conf["bgp_as"] # pour l'instant, on le met en dur mais après il faudra le rajouter dans le json pour chaque routeur 
+                        config_BGP(tn,as_number,router_conf['name'],data)
+                    #else :
+                    #    return 0
+            #si on arrive pas à se connecter au routeur 
+    except ConnectionRefusedError:
+        pass
 
 
 
@@ -296,7 +455,6 @@ if __name__ == "__main__":
     print("Début main configuration Telnet")
 
 
-    print ('Number of arguments:', len(sys.argv), 'arguments.')
     if len(sys.argv) >= 4 :
         username = sys.argv[1]
         project_name =  sys.argv[2]
@@ -304,8 +462,8 @@ if __name__ == "__main__":
         mode = sys.argv[4]
     else : #argument par défaut 
         username = "plnohet"
-        project_name =  "OSPF"
-        filename = 'data_cop.json'
+        project_name =  "Basic"
+        filename = 'olddata_test.json'
         mode = 0
     if(mode == 0 ):
         config_telnet(username,project_name,filename)
